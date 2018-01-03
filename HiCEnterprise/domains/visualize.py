@@ -10,7 +10,7 @@ import csv
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from ..utils import load_hicmap
+from ..utils import load_hicmap, create_folders
 
 
 class Plotter:
@@ -30,8 +30,8 @@ class Plotter:
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
 
     def _get_interactions(self, stats_folder, filename, corr=""):
-        name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + "_".join(
-            str(self.threshold).split('.') + '.txt')
+        name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
+               "_".join(str(self.threshold).split('.')) + '.txt'
         interactions_file = open(os.path.abspath(name), 'r')
         interactions = csv.reader(interactions_file, delimiter='\t')
         return (interactions)
@@ -56,7 +56,7 @@ class Plotter:
 
         return np.triu(i_m)
 
-    def plot(self, interaction_matrix, corr=""):
+    def plot(self, interaction_matrix, figures_folder, corr=""):
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
@@ -66,18 +66,19 @@ class Plotter:
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         plt.legend(loc='best')
         plt.title("Plot", fontsize=7)
-        output = self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
+        output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
         plt.close()
 
-    def run(self):
+    def run(self, figures_folder):
         """
         Runs the plotter
         """
+        figures_folder = create_folders([figures_folder])[0]
         interaction_matrix = self.prepare_interaction_matrix(self.interactions)
-        self.plot(interaction_matrix)
+        self.plot(interaction_matrix, figures_folder)
         corr_interaction_matrix = self.prepare_interaction_matrix(self.corr_interactions)
-        self.plot(corr_interaction_matrix, corr="corr_")
+        self.plot(corr_interaction_matrix, figures_folder, corr="corr_")
 
 
 # Argument Parsing
@@ -90,13 +91,15 @@ parser.add_argument('-i', '--interactions', type=str,
 parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=True)
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
                     default='../stats/')
+parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str,
+                    default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
     p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold)
-    p.run()
+    p.run(args.figures_folder)
 
 
 # TODO add TAD plotting

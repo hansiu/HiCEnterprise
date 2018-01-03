@@ -127,7 +127,7 @@ class Extractor:
             rows.append([self.chr] + self.domains[sig[0]] + self.domains[sig[1]] + [sig[2]])
         stats_writer.writerows(rows)
 
-    def run(self, stats_folder, plotting):
+    def run(self, stats_folder, plotting, figures_folder):
         """
         Runs the analysis
         """
@@ -140,4 +140,4 @@ class Extractor:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
             p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold)
-            p.run()
+            p.run(figures_folder)

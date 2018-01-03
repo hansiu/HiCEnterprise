@@ -21,7 +21,7 @@ def exec_domains(args):
     """
     from HiCEnterprise.domains.extract import Extractor
     e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold)
-    e.run(args.stats_folder, args.plotting)
+    e.run(args.stats_folder, args.plotting, args.figures_folder)
 
 
 # Main argument parser with arguments used in both types of analysis
@@ -41,6 +41,8 @@ parent_parser.add_argument('-t', '--threshold', help='Statistical cutoff thresho
 parent_parser.add_argument('-s', '--stats_folder', help="Folder to save the statistics & significant points in",
                            type=str,
                            default='../stats/')
+parent_parser.add_argument('-f', '--figures_folder', help="Folder to save the figures (plots) in", type=str,
+                           default='../figures/')
 
 # Regions analysis subparser
 parser_regions = subparsers.add_parser('regions',
@@ -59,8 +61,6 @@ parser_regions.add_argument('--num_regs', help='Number of regions to consider an
 parser_regions.add_argument('-a', '--section', help="Section of bp for the plot", type=str)
 parser_regions.add_argument('-p', '--pickled_folder', help="Folder with pickled files (to load from/save in)", type=str,
                             default='../pickles/')
-parser_regions.add_argument('-f', '--figures_folder', help="Folder to save the figures (plots) in", type=str,
-                            default='../figures/')
 parser_regions.add_argument('--plotting',
                             help="If there should be plotting, and if so should it be with rpy2 or matplotlib."
                                  " Options: mpl, rpy2.", type=str)
