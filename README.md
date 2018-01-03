@@ -1,4 +1,4 @@
-# HiCEnterprise-dev
+# HiCEnterprise
 Scripts for prediction of long-range interactions between regions/domains based on Hi-C maps.
 Establish contact!
 
