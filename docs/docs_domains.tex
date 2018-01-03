@@ -1,0 +1,102 @@
+\chapter{HiCEnterprise tads}
+\label{domains}
+
+In the domain part of the package the significance of interaction between domains A and B is calculated as the
+probability of observing a stronger contact under the fitted Hypergeometric distribution, where N (population size) is
+the sum of all frequencies in the Hi-C map, a is the sum from the column of domain A and b is the sum from the row of
+domain B (number of success states in the population and number of draws). This idea and original code was developed
+by Irina Tuszynska and presented in (Niskanen et al. n.d.).
+
+\section{Input files}
+\label{sec:input2}
+
+To run the point interactions analysis you need:
+\begin{itemize}
+    \item one Hi-C map in numpy format for an N chromosome (named mtx-N-N.npy)
+    \item file with domains definition in the format: domain id, chromosome name, start coordinate, end coordinate. Optionally fifth column may contain \lstinline{sherpa} level.
+\end{itemize}
+
+All coordinates should be provided in bp.
+
+\subsubsection{Example files}
+Example files are provided in \lstinline{HiCEnterprise/HiCEnterprise/tests/test_files} directory in \lstinline{maps} and \lstinline{doms}.
+
+Overall, the usage looks like this:
+
+\begin{lstlisting}
+HiCEnterprise domains domains_options
+\end{lstlisting}
+
+
+To see the available options:
+\begin{lstlisting}
+HiCEnterprise domains -h
+\end{lstlisting}
+
+
+\subsubsection{Example runs}
+There are a few required arguments for the analysis.
+\begin{itemize}
+    \item Path to folder with Hi-C map in a numpy format: \lstinline{--hic_folder ./map40kb}
+    \item File with domain definition: \lstinline{--domain_file domains.txt}
+    \item Name of the chromosome to run the analysis for: \lstinline{--chr 22}
+    \item Resolution (bin size) of Hi-C maps in bp (all maps provided should be of the same resolution): \lstinline{--bin_res 40000}
+\end{itemize}
+
+For information on formats of files see~\ref{sec:input2}.
+
+Run with only required arguments:
+
+\begin{lstlisting}
+HiCEnterprise domains --hic_folder ./map40kb --domain_file
+./domains.txt --chr 22 --bin_res 40000
+\end{lstlisting}
+
+
+\subsubsection{Visualisation} % TODO !!!!
+
+If you want to plot the results with matplotlib, add --plotting argument to the command. Resulting figures can be found in directory
+provided by --figures\_folder option.
+
+In example:
+\begin{lstlisting}
+HiCEnterprise domains --hic_folder ./map40kb --domain_file
+./domains.txt --chr 22 --bin_res 40000 --plotting
+--figures_folder ./my_folder_for_figures
+\end{lstlisting}
+
+
+If you don not provide the --figures\_folder argument, ./figures directory will be created and the plots will be put
+there.
+
+\section{Output files}
+
+\subsection{stats folder}
+This folder contains the results from the analysis. Result filenames consist of domains file name, map folder names,
+'stats', chromosome name and statistical cutoff. % TODO what about resolution
+threshold. Example: domains-map40kb-stats22-0\_01.txt.
+
+\subsection{figures folder}
+In this folder you will find the plotted figures if the --plotting argument was used. Interaction maps are
+extracted to PNG files. Files are named by the regions file name, maps name and other arguments.
+
+\section{All arguments listed alphabetically}
+\label{sec:arguments2}
+\begin{itemize}
+    \item -b, --bin\_res : REQUIRED Resolution (size of the bins on the Hi-C maps) in bp i.e.~10000 for 10kb resolution.
+All maps should be of same resolution.
+\item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
+    \item -d, --domain\_file : REQUIRED Text file with domain definition in the format: \\
+    dom\_id(int) chromosome(int) dom\_start(bp) dom\_end(bp) sherpa-lvl(optional). %TODO
+    \item -f, --figures\_folder : Folder to save the figures (plots) in. Default is '../figures/'.
+    \item -m, --hic\_folder : REQUIRED Folder in which the Hi-C data is stored with file names in format mtx-N-N.npy, where
+N = chromosome name.
+\item --plotting : If results should be plotted. matplotlib library is required.
+    \item -s, --stats\_folder : Folder to save the statistics and significant points in. Default is '../stats/'.
+    \item --sherpa\_lvl : If there are sherpa levels in the file and which one to use.
+\item -t, --threshold :  Statistical cutoff threshold. Default is 0.01.
+\end{itemize}
+
+
+
+

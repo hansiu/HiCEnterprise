@@ -1,0 +1,88 @@
+\chapter{Introduction}
+\label{intro}
+
+HiCEnterprise predicts long-range interactions between regions/domains based on Hi-C maps.
+Establish contact!
+
+\section{What is in the package?}
+HiCEnterprise takes a list of regions/domains and searches for their significant interactions on given Hi-C maps.
+Package consists of two types of analyses: regions and domains.
+
+\subsection{Types of analyses}
+
+\subsubsection{Regions}
+This part of the package is an implementation of the method for identification of long-range interacting regions and
+creating interaction profiles based on Hi-C data as introduced by (Won et al. 2016).
+
+More in~\ref{regions}.
+
+\subsubsection{Domains}
+In the domain part of the package we implemented the method for prediction of long-range interactions between TADs
+(Topologically Associating Domains) as presented by (Niskanen et al. n.d.).
+
+More in~\ref{domains}.
+
+\section{Dependencies}
+\begin{itemize}
+\item \href{https://www.python.org}{Python} version 2.7 or 3.5/6
+\item required python packages are provided in requirements.txt file.
+\item if you want to plot through R, you need have R installed with needed packages.
+
+\end{itemize}
+
+\section{Basic usage}
+
+\begin{lstlisting}
+HiCEnterprise type options
+\end{lstlisting}
+
+
+'type' can be either regions or domains. Other options are type dependent.
+
+If you want to see the list of available arguments with short explanations type either \\
+\lstinline{HiCEnterprise regions --help}
+or \lstinline{HiCEnterprise domains --help}. Full specifications for each argument can be found in the documentation
+(\ref{regions} and~\ref{domains})
+
+\subsection{Installation}
+
+\begin{lstlisting}
+python setup.py install
+\end{lstlisting}
+
+
+You may need administrative privileges to do this.
+
+\subsubsection{Testing the installation}
+
+To test if the scripts behave in a way they should be find the main HiCEnterprise directory and run:
+
+\begin{lstlisting}
+python setup.py test
+\end{lstlisting}
+
+pytest package is needed for running the test framework.
+
+
+\subsection{Examples}
+
+We provided some example files (used for testing too) with which you can learn to use the program.
+Here you can see two example runs:
+
+\subsubsection{Regions}
+
+\begin{lstlisting}
+HiCEnterprise regions regions_options
+\end{lstlisting}
+
+
+\subsubsection{Domains}
+
+\begin{lstlisting}
+HiCEnterprise domains domains_options
+\end{lstlisting}
+
+
+Additional examples and specifications for each argument can be found in the documentation for a specific type
+(\ref{regions} and~\ref{domains}).
+

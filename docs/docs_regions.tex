@@ -1,0 +1,165 @@
+\chapter{HiCEnterprise regions}
+\label{regions}
+
+Regions part of package can be used to identify long-range interacting regions and creating interaction profiles based
+on Hi-C data. It is based on the method described by (Won, 2016).
+
+The significance of the individual pairwise interaction between bins is calculated as the probability of observing a
+stronger contact under the fitted Weibull distribution matched by chromosome and distance. FDR (False Discovery Rate) is
+used for correcting for multiple testing.
+
+\section{Input files}
+\label{sec:input}
+
+To run the point interactions analysis you need:
+\begin{itemize}
+    \item at least one Hi-C map in numpy format for an N chromosome (named mtx-N-N.npy)
+    \item BED file with coordinates of regions to extract interaction profiles for (or Enhancer Atlas FASTA file - it has positions of the enhancer region in fasta header of each sequence).
+\end{itemize}
+
+All coordinates should be provided in bp. Analysis results will be more reliable if you provide multiple Hi-C maps that
+are biological replicates.
+
+\subsubsection{Example files}
+Example files are provided in \lstinline{HiCEnterprise/HiCEnterprise/tests/test_files} directory in \lstinline{maps} and \lstinline{enhseq}.
+
+\section{Usage}
+
+\subsection{Basics}
+Overall, the usage looks like this:
+\begin{lstlisting} 
+    HiCEnterprise regions regions_options
+\end{lstlisting}
+
+To see the available options:
+\begin{lstlisting}
+HiCEnterprise regions -h
+\end{lstlisting}
+
+\subsubsection{Example runs}
+There are a few required arguments for the analysis.
+\begin{itemize}
+    \item Path to folders with Hi-C maps in a numpy format: \\
+\lstinline{--hic_folders ./map40kb_replicate1 ./map40kb_replicate2 \ldots}
+    \item File with coordinates of regions to extract interaction profiles for: \\
+\lstinline{--region_file regions.bed}
+    \item Name of the chromosome to run the analysis for:  \lstinline{--chr 22}
+    \item Resolution (bin size) of Hi-C maps in bp (all maps provided should be of the same resolution): \lstinline{--bin_res 40000}
+\end{itemize}
+
+For information on formats of files see~\ref{sec:input}.
+
+
+
+Run with only required arguments:
+\begin{lstlisting}
+HiCEnterprise regions --hic_folders ./map40kb_replicate1 
+./map40kb_replicate2 --region_file ./regions.bed --chr 22
+--bin_res 40000
+\end{lstlisting}
+
+\subsubsection{Visualisation}
+
+If you want to plot the results, add --plotting argument to the command. It is possible to choose if you want to plot
+with matplotlib (mpl) or rpy2 and R (rpy2). Resulting figures can be found in directory provided by --figures\_folder
+option.
+
+Example plotting with matplotlib:
+\begin{lstlisting}
+HiCEnterprise regions --hic_folders ./map40kb_replicate1 
+./map40kb_replicate2 --region_file ./regions.bed --chr 22 --bin_res
+40000 --plotting mpl --figures_folder ./my_folder_for_figures
+\end{lstlisting}
+
+If you don not provide the --figures\_folder argument, ./figures directory will be created and the plots will be put
+there.
+
+\paragraph{Example usage files}
+
+There are also some files with example usage files provided in HiCEnterprise/example\_usage directory i.e.:
+\begin{itemize}
+    \item TSS enrichment analysis for found predictions of interactions
+    \item generating random bins
+    \item extracting unique bins and adjusting statistics for comparison between two analyses
+\end{itemize}
+
+Those additional scripts may generate new directories and results. For now, as they are not an official part of the
+package they are not discussed in this documentation.
+
+\section{Output files}
+
+\subsection{stats folder}
+This folder contains the results from the analysis. Result filenames consist of regions file name, map folders names,
+either 'stats' or 'significant', chromosome name, number of bins considered, resolution and statistical cutoff
+threshold. Example: regions-map40kb\_replicate1-map40kb\_replicate2-stats22-200x40000bp-0\_01.txt.
+
+\subsubsection{'stats' files}
+Stats files are text files that contain statistics derived from analysis. They provide the number of regions (bin
+regions) in the analysis, how many had predictions and some simple statistics.
+
+\subsubsection{'significant' files}
+Files with 'significant' in name contain the statistically significant (with given FDR threshold) interactions derived
+from the analysis. They can be created in three formats (see~\ref{sec:arguments}):
+\paragraph{custom txt format}
+Txt contains bin and regions coordinates and corresponding predictions of interactions with q-values.
+\paragraph{modified BED format}
+3 first columns are coordinates of the predicted interaction, 4th column encodes coordinates of region that interacts,
+5th column is score (-log10 q-value).
+\paragraph{modified GFF format}
+Modified GFF contains columns as follows:
+\begin{itemize}
+    \item chromosome name
+    \item program name
+    \item type: group (group of regions and their predictions), region, prediction
+    \item start coordinate
+    \item end coordinate
+    \item score (-log10 q-value) for predictions
+    \item strand (none, '.')
+    \item frame (none, '.')
+    \item ID of Parent (group of regions and their predictions) with chromosome name and bin from original assembly
+\end{itemize}
+
+Results in GFF files can be remapped from the original assembly to another one with argument --remap (see ~\ref{sec:arguments}).
+GFF files are suitable for a representation in Jbrowse with modified CSS (thanks to Karolina Sienkiewicz).
+
+\subsection{figures folder}
+In this folder you will find the plotted figures if the --plotting argument was used. Interaction profiles are
+extracted to PDF files. Files are named by the regions file name and additional plotting arguments (--num\_regs,
+--section). Each interaction profile is composited of weighted log Intensity, -log10 p-values and -log10 q-values.
+
+\subsection{pickles folder}
+Pickles folder contains pickle files (generated by pickle python library) with saved parts of results that may be useful
+for running new analyses on the same data (i.e.~same Hi-C maps but other regions). Weibull fitting takes a while, so
+saving the parameters of the distribution for a given map, chromosome and distance can save a lot of time in future
+calculations.
+
+\section{All arguments listed alphabetically}
+\label{sec:arguments}
+\begin{itemize}
+\item \href{https://www.python.org}{Python} version 2.7 or 3.5/6
+\item required python packages are provided in requirements.txt file.
+\item if you want to plot through R, you need have R installed with needed packages.
+\item -a, --section : Section of bp for the plot
+\item -b, --bin\_res : REQUIRED Resolution (size of the bins on the Hi-C maps) in bp i.e.~10000 for 10kb resolution. All maps
+should be of same resolution.
+\item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
+\item -f, --figures\_folder : Folder to save the figures (plots) in. Default is '../figures/'.
+\item -m, --hic\_folders : REQUIRED Folder/folders in which the Hi-C data is stored with file names in format mtx-N-N.npy, where N =
+chromosome name
+\item -n, --num\_bins : Number of bins left and right to be considered when extracting the interaction profile.
+\item --num\_regs : Number of regions to plot
+\item -p, --pickled\_folder : Folder with pickled files (to load from/save in). Default is '../pickles/'.
+\item --plotting : If there should be plotting, and if so should it be with rpy2 or matplotlib. Options: mpl, rpy2. Default is TODO
+\item -r, --region\_file : REQUIRED Any tab-delimited BED file or FASTA File from EnhancerAtlas with regions and their positions.
+\item --regs\_algorithm : Algorithm for sorting regions to bins. Options: all, one. Default is all. TODO more info
+\item --remap : Assembly that maps and regions are currently in, and assembly in which to save the stats in. Format:
+assembly:new\_assembly i.e.~hg\_19:hg\_38. Currently only available for GFF files.
+\item -s, --stats\_folder : Folder to save the statistics and significant points in. Default is '../stats/'.
+\item --single\_sig : If the single map significant points should be saved or not.
+\item --stat\_formats : In which file formats to save statistics. It is possible to provide multiple formats. Available:
+txt, bed, gff. Default is only txt.
+\item -t, --threshold : Statistical cutoff threshold. Default is 0.01.
+\end{itemize}
+
+
+

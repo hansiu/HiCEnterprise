@@ -1,0 +1,32 @@
+# Pycharm
+.idea
+
+# Distribution and packaging
+build/
+*.egg-info/
+/dist/
+.eggs/
+
+# Project-generated files
+**/stats/
+**/stats-corr/
+**/*.png
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.cache/
+
+# virtualenv
+venv/
+ENV/
+
+# TEX
+**/*.aux
+**/*.log
+**/*.out
+**/*.gz
+**/*.toc
+
+
