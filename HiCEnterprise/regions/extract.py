@@ -210,7 +210,7 @@ class Extractor:
         return regs
 
     def _get_reg_justone(self, position):
-        bin = tuple(x / self.bin_res for x in position)
+        bin = tuple(int(x / self.bin_res) for x in position)
         rem = tuple(x % self.bin_res for x in position)
         if bin[1] - bin[0] == 1:
             if self.bin_res - rem[0] > rem[1]:
