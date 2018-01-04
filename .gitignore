@@ -10,6 +10,8 @@ build/
 # Project-generated files
 **/stats/
 **/stats-corr/
+**/figures/
+**/pickles/
 **/*.png
 
 # Python
@@ -28,5 +30,3 @@ ENV/
 **/*.out
 **/*.gz
 **/*.toc
-
-
