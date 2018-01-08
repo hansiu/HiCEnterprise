@@ -149,9 +149,9 @@ chromosome name
 \item -n, --num\_bins : Number of bins left and right to be considered when extracting the interaction profile.
 \item --num\_regs : Number of regions to plot
 \item -p, --pickled\_folder : Folder with pickled files (to load from/save in). Default is '../pickles/'.
-\item --plotting : If there should be plotting, and if so should it be with rpy2 or matplotlib. Options: mpl, rpy2. Default is TODO
+\item --plotting : If there should be plotting, and if so should it be with rpy2 or matplotlib. Options: mpl, rpy2. Default is mpl.
 \item -r, --region\_file : REQUIRED Any tab-delimited BED file or FASTA File from EnhancerAtlas with regions and their positions.
-\item --regs\_algorithm : Algorithm for sorting regions to bins. Options: all, one. Default is all. TODO more info
+\item --regs\_algorithm : Algorithm for sorting regions to bins. Options: all, one. Default is all. 'all' assigns the region to all bins that if fits into; 'one' chooses the bin in which most of the region is.
 \item --remap : Assembly that maps and regions are currently in, and assembly in which to save the stats in. Format:
 assembly:new\_assembly i.e.~hg\_19:hg\_38. Currently only available for GFF files.
 \item -s, --stats\_folder : Folder to save the statistics and significant points in. Default is '../stats/'.
