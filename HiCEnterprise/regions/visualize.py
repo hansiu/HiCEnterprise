@@ -39,7 +39,7 @@ class Plotter:
         Plots interaction profiles for chosen regions to pdf file either with rpy2 or matplotlib.
         """
 
-        filename = figures_folder + '/' + self.regions_name + self.chr
+        filename = figures_folder + '/' + self.regions_name +'-'+ self.chr
         if section:
             filename += '-' + str(section[0]) + '-' + str(section[1])
         if self.num_regs:
@@ -161,12 +161,12 @@ class Plotter:
         pickled_folder, figures_folder = create_folders([pickled_folder, figures_folder])
         pck_filename_base = pickled_folder + '/' + self.chr + '-' + str(self.num_bins) + 'x' + str(
             self.bin_res) + 'bp-'
-        if os.path.exists(pck_filename_base + 'regs' + self.regions_name):
+        if os.path.exists(pck_filename_base + 'regs-' + self.regions_name):
             logger.info('Loading region data from pickled file')
-            with open(pck_filename_base + 'regs' + self.regions_name, 'rb') as fp:
+            with open(pck_filename_base + 'regs-' + self.regions_name, 'rb') as fp:
                 regs = pickle.load(fp)
         else:
-            logger.critical('No pickled region file in ' + pickled_folder)
+            logger.critical('No pickled region file '+pck_filename_base + 'regs' + self.regions_name+' in ' + pickled_folder)
             sys.exit(1)
 
         if section:
@@ -209,5 +209,5 @@ parser.add_argument('--type', help="If the plotting should be with rpy2 or matpl
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    p = Plotter(args.regions_name, args.chr, args.bin_res, args.num_bins, args.threshold, args.bin_res)
+    p = Plotter(args.regions_name, args.chr, args.num_regs, args.num_bins, args.threshold, args.bin_res)
     p.run(args.section, args.pickled_folder, args.figures_folder, args.type)
