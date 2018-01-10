@@ -1,12 +1,12 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 if __name__ == '__main__':
     setup(
         name='HiCEnterprise',
-        version='0.1.1',
+        version='0.1.2',
         author='Hania Kranas',
-        packages=["HiCEnterprise"],
+        packages=find_packages(exclude=['tests']),
         include_package_data=True,
         url='https://github.com/hansiu/HiCEnterprise',
         license='LICENSE.txt',
@@ -15,7 +15,7 @@ if __name__ == '__main__':
         entry_points={'console_scripts': ['HiCEnterprise=HiCEnterprise.__main__:main']},
         keywords=['bioinformatics','hi-c','interactions','regions','domains','chromatin'],
         classifiers=[
-            'Development Status :: 1 - Planning'
+            'Development Status :: 2 - Pre-Alpha'
             'Environment :: Console',
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: MIT License',

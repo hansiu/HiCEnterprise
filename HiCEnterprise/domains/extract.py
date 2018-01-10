@@ -30,7 +30,7 @@ class Extractor:
         self.sherpa_level = sherpa_lvl or None
         self.domains = self._load_domains(domain_file)
         self._check_overlap()
-        self.hic_folder = hic_folder
+        self.hic_folder = os.path.abspath(hic_folder)
         self.hicmap = load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
         self.hic_name = os.path.basename(os.path.abspath(hic_folder))
         self.threshold = threshold
@@ -52,7 +52,7 @@ class Extractor:
         for i in range(len(self.domains) - 1):
             if self.domains[i + 1][0] <= self.domains[i][1]:
                 logger.error('The domains ' + str(self.domains[i]) + str(',') + str(
-                    self.domains[i + 1]) + 'are overlapping. Check input data')
+                    self.domains[i + 1]) + ' are overlapping. Check input data')
                 sys.exit(1)
 
     def create_domain_matrix(self):

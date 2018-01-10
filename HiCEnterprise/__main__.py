@@ -7,7 +7,7 @@ def exec_regions(args):
     """
     execute regions analysis
     """
-    from HiCEnterprise.regions.extract import Extractor
+    from .regions.extract import Extractor
     e = Extractor(os.path.basename(args.region_file).split('.')[0], args.hic_folders, args.chr, args.bin_res,
                   args.num_bins,
                   args.threshold, args.pickled_folder, args.figures_folder, args.stats_folder)
@@ -19,7 +19,7 @@ def exec_domains(args):
     """
     execute domains analysis
     """
-    from HiCEnterprise.domains.extract import Extractor
+    from .domains.extract import Extractor
     e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold)
     e.run(args.stats_folder, args.plotting, args.figures_folder)
 
@@ -98,4 +98,5 @@ parser_domains.add_argument('--sherpa_lvl', help="If there are sherpa levels in 
 def main():
     if len(sys.argv) == 1:
         sys.argv.append('-h')
-    parser.parse_args()
+    args = parser.parse_args()
+    args.func(args)
