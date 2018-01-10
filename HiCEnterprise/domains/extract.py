@@ -31,8 +31,8 @@ class Extractor:
         self.domains = self._load_domains(domain_file)
         self._check_overlap()
         self.hic_folder = os.path.abspath(hic_folder)
-        self.hicmap = load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
-        self.hic_name = os.path.basename(os.path.abspath(hic_folder))
+        self.hicmap = load_hicmap(self.hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
+        self.hic_name = os.path.basename(self.hic_folder)
         self.threshold = threshold
 
     def _load_domains(self, domain_file):

@@ -35,7 +35,7 @@ class TestExtractor():
         assert isinstance(e.domains, list)
         assert e.domains[0] == [0, 0]
         assert isinstance(e.hicmap, np.ndarray)
-        assert e.hic_folder == TEST_DIR + '/test_files/maps/'
+        assert e.hic_folder == TEST_DIR + '/test_files/maps'
         assert e.hic_name == 'maps'
         assert e.threshold == 0.01
         assert e.hicmap.shape == (100, 100)
