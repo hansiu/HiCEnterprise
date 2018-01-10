@@ -418,9 +418,9 @@ class Extractor:
                         x == len(supp_in_all_ind) - 1 or supp_in_all_ind[x] + 1 != supp_in_all_ind[x + 1]][:-1]
                 pairs = [tuple([p[0], p[-1]]) for p in np.split(np.array(supp_in_all_ind), inds)]
                 for pair in pairs:
-                    sig.append([tuple([reg.bin + t[pair[0]], reg.bin + t[pair[-1]]]), zip(
+                    sig.append([tuple([reg.bin + t[pair[0]], reg.bin + t[pair[-1]]]), list(zip(
                         *[reg.corrected_pvalues[i][pair[0]:pair[1] + 1] for i in
-                          range(len(reg.corrected_pvalues))])])
+                          range(len(reg.corrected_pvalues))]))])
 
             if sig:
                 r_pred += 1

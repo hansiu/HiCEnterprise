@@ -1,20 +1,31 @@
-from setuptools import setup, find_packages
-import re, io
+from setuptools import setup
 
 
 if __name__ == '__main__':
     setup(
         name='HiCEnterprise',
-        version='0.1.0',
+        version='0.1.1',
         author='Hania Kranas',
         packages=["HiCEnterprise"],
-        # url='', # TODO add github address
+        include_package_data=True,
+        url='https://github.com/hansiu/HiCEnterprise',
         license='LICENSE.txt',
         description='Scripts for prediction of interaction between regions/domains based on Hi-C maps',
         long_description=open('README.md').read(),
         entry_points={'console_scripts': ['HiCEnterprise=HiCEnterprise.__main__:main']},
         keywords=['bioinformatics','hi-c','interactions','regions','domains','chromatin'],
-        # classifiers=[], # TODO add classifiers etc
+        classifiers=[
+            'Development Status :: 1 - Planning'
+            'Environment :: Console',
+            'Intended Audience :: Science/Research',
+            'License :: OSI Approved :: MIT License',
+            'Programming Language :: Python :: 2',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Topic :: Scientific/Engineering :: Bio-Informatics'
+        ],
          install_requires=[
              "numpy",
              "scipy",
