@@ -64,7 +64,6 @@ class Plotter:
         plt.imshow(interaction_matrix, origin='upper', norm=LogNorm(), cmap="Blues", interpolation='nearest')
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
-        plt.legend(loc='best')
         plt.title("Plot", fontsize=7)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
