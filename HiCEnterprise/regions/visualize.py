@@ -16,6 +16,7 @@ import sys
 import logging
 from textwrap import wrap
 from ..utils import create_folders
+from .extract import Bin
 
 logger = logging.getLogger('regions.visualize')
 logging.basicConfig(level=logging.INFO)
