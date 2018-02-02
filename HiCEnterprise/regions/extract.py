@@ -445,6 +445,7 @@ class Extractor:
     def _save_sig_gff(self, file, sig, single, positions, bin, remap, lo):
         if sig:
             rows = []
+            region_strand = ''
             for pos in positions:
                 if remap is not None:
                     rem = self._remap(pos[0], pos[1], lo)
@@ -453,9 +454,10 @@ class Extractor:
                            [('chr' + self.chr, pos[1] + 1, '+')]]
                 if rem is not None:
                     rows.append(
-                        [rem[0][0][0], 'LongRanger', 'region', rem[0][0][1], rem[1][0][1], 0, rem[0][0][2],
+                        [rem[0][0][0], 'LongRanger', 'region', rem[0][0][1], rem[1][0][1], 0, '.',
                          '.', 'Parent=bin_' + self.chr + '_' + str(
                             bin)])
+                    region_strand = rem[0][0][2]
             if len(set([row[0] for row in rows])) != 1 or len(set([row[6] for row in rows])) != 1:
                 return False
             mi = min([row[3] for row in rows])
@@ -468,7 +470,7 @@ class Extractor:
                     else:
                         rem = [[('chr' + self.chr, ((x[0][0] + b) * self.bin_res) + 1, '+')],
                                [('chr' + self.chr, ((x[0][0] + b + 1) * self.bin_res), '+')]]
-                    if rem is not None and rem[0][0][0] == rows[0][0] and rem[0][0][2] == rows[0][6]:
+                    if rem is not None and rem[0][0][0] == rows[0][0] and rem[0][0][2] == region_strand:
                         if rem[0][0][1] < mi:
                             mi = rem[0][0][1]
                         if rem[1][0][1] > ma:
