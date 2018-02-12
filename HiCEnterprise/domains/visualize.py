@@ -18,13 +18,15 @@ class Plotter:
     Plots domain interaction maps with matplotlib.
     """
 
-    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold):
+    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ):
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
         self.hicmap = clip_and_blur(load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
         self.hic_name = os.path.basename(hic_folder)
         self.threshold = threshold
+        self.plot_title = plot_title
+        self.ticks_separ = ticks_separ
         self.interactions = self._get_interactions(stats_folder, interactions)
         self.interactions_name = os.path.basename(os.path.abspath(interactions))
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
@@ -71,8 +73,10 @@ class Plotter:
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         len_ma = self.hicmap.shape[0]
-        plt.xticks(np.arange(0, len_ma, 400))
-        plt.title("Domain interactions", fontsize=7)
+        if ticks_separ != 0:
+            plt.xticks(np.arange(0, len_ma, self.ticks_separ))
+        else pass
+        plt.title(self.plot_title, fontsize=7)
         #ax = sns.heatmap(np.tril(self.hicmap), cmap="Reds", cbar = True)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
@@ -101,18 +105,19 @@ parser.add_argument('-s', '--stats_folder', help="Folder to load the significant
                     default='../stats/')
 parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
-<<<<<<< HEAD
 parser.add_argument('-p', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
 parser.add_argument('-d', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
 
-=======
->>>>>>> f3881bbd0ae63217acc1362c253760f7163eee8d
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
+<<<<<<< HEAD
+    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation)
+=======
     p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold)
+>>>>>>> f3881bbd0ae63217acc1362c253760f7163eee8d
     p.run(args.figures_folder)
 
 
