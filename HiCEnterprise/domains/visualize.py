@@ -4,13 +4,13 @@ Based on code by Irina Tuszynska and Rafal Zaborowski.
 """
 import argparse, os
 import numpy as np
-import matplotlib
 import csv
-
+import matplotlib
 matplotlib.use('Agg')
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from ..utils import load_hicmap, create_folders
+from ..utils import load_hicmap, create_folders, clip_and_blur
 
 
 class Plotter:
@@ -22,7 +22,7 @@ class Plotter:
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
-        self.hicmap = load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
+        self.hicmap = clip_and_blur(load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
         self.hic_name = os.path.basename(hic_folder)
         self.threshold = threshold
         self.interactions = self._get_interactions(stats_folder, interactions)
@@ -59,15 +59,21 @@ class Plotter:
 
         return np.triu(i_m)
 
+
     def plot(self, interaction_matrix, figures_folder, corr=""):
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
         plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
         plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
+        sns.set_style("ticks")
+        sns.despine(right=True)
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
-        plt.title("Plot", fontsize=7)
+        len_ma = self.hicmap.shape[0]
+        plt.xticks(np.arange(0, len_ma, 400))
+        plt.title("Domain interactions", fontsize=7)
+        #ax = sns.heatmap(np.tril(self.hicmap), cmap="Reds", cbar = True)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
         plt.close()
@@ -93,8 +99,7 @@ parser.add_argument('-i', '--interactions', type=str,
 parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=True)
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
                     default='../stats/')
-parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str,
-                    default='../figures/')
+parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
 
 # Main
