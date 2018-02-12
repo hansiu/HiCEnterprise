@@ -52,7 +52,10 @@ class Plotter:
             if dom1 == dom2:
                 i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 0.0
             else:
-                i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = -np.log10(float(l[5]))
+                if float(l[5])!= 0.0:
+                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = round(-np.log10(float(l[5])),5)
+                else:
+                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 500 # some big number here
 
         return np.triu(i_m)
 
@@ -60,8 +63,8 @@ class Plotter:
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
-        plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
-        plt.imshow(interaction_matrix, origin='upper', norm=LogNorm(), cmap="Blues", interpolation='nearest')
+        plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
+        plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         plt.title("Plot", fontsize=7)
