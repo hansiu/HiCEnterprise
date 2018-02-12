@@ -2,16 +2,15 @@
 Script for plotting domain interaction maps.
 Based on code by Irina Tuszynska and Rafal Zaborowski.
 """
-import argparse, os, scipy.ndimage
+import argparse, os
 import numpy as np
-import matplotlib
-import seaborn as sns
 import csv
-
+import matplotlib
 matplotlib.use('Agg')
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from ..utils import load_hicmap, create_folders
+from ..utils import load_hicmap, create_folders, clip_and_blur
 
 
 class Plotter:
@@ -19,15 +18,13 @@ class Plotter:
     Plots domain interaction maps with matplotlib.
     """
 
-    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ):
+    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold):
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
-        self.hicmap = load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
+        self.hicmap = clip_and_blur(load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
         self.hic_name = os.path.basename(hic_folder)
         self.threshold = threshold
-        self.plot_title = plot_title
-        self.ticks_separ = ticks_separ
         self.interactions = self._get_interactions(stats_folder, interactions)
         self.interactions_name = os.path.basename(os.path.abspath(interactions))
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
@@ -55,37 +52,27 @@ class Plotter:
             if dom1 == dom2:
                 i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 0.0
             else:
-                i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = -np.log10(float(l[5]))
+                if float(l[5])!= 0.0:
+                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = round(-np.log10(float(l[5])),5)
+                else:
+                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 500 # some big number here
 
         return np.triu(i_m)
-        
-    def clip_and_blur(self,arr, stddevs=5, blur=1):
-        #print 'PRINT', arr
-        arr = np.ma.masked_invalid(arr)
-        mean = np.mean(arr)
-        stddev = np.var(arr) ** 0.5
-        np.clip(arr, 0, mean + stddevs * stddev, out=arr)
-        arr = np.ma.filled(arr, 0)
-        scipy.ndimage.gaussian_filter(arr, blur, output=arr)
-        np.clip(arr, mean * 0.01, mean + stddevs * stddev, out=arr)
-        return arr
+
 
     def plot(self, interaction_matrix, figures_folder, corr=""):
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
+        plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
+        plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
         sns.set_style("ticks")
         sns.despine(right=True)
-        hicmap= self.clip_and_blur(self.hicmap)
-        plt.imshow(np.tril(hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
-        plt.imshow(interaction_matrix, origin='upper', norm=LogNorm(), cmap="Reds", interpolation='nearest')
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         len_ma = self.hicmap.shape[0]
-        if ticks_separ != 0:
-            plt.xticks(np.arange(0, len_ma, self.ticks_separ))
-        else pass
-        plt.title(self.plot_title, fontsize=7)
+        plt.xticks(np.arange(0, len_ma, 400))
+        plt.title("Domain interactions", fontsize=7)
         #ax = sns.heatmap(np.tril(self.hicmap), cmap="Reds", cbar = True)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
@@ -95,6 +82,7 @@ class Plotter:
         """
         Runs the plotter
         """
+        figures_folder = create_folders([figures_folder])[0]
         interaction_matrix = self.prepare_interaction_matrix(self.interactions)
         self.plot(interaction_matrix, figures_folder)
         corr_interaction_matrix = self.prepare_interaction_matrix(self.corr_interactions)
@@ -111,18 +99,20 @@ parser.add_argument('-i', '--interactions', type=str,
 parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=True)
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
                     default='../stats/')
-parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str,
-                    default='../figures/')
+parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
+<<<<<<< HEAD
 parser.add_argument('-p', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
 parser.add_argument('-d', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
 
+=======
+>>>>>>> f3881bbd0ae63217acc1362c253760f7163eee8d
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
-    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation)
+    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold)
     p.run(args.figures_folder)
 
 

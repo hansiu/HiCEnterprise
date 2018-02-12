@@ -5,10 +5,24 @@ Utilities for both domains and regions.
 import os
 import numpy as np
 import logging
+import scipy.ndimage
 
 logger = logging.getLogger('utils')
 logging.basicConfig(level=logging.INFO)
 
+
+def clip_and_blur(arr, stddevs=5, blur=1):
+    """
+    Clips and blurs the matrix as needed. By Krzysiek Królak.
+    """
+    arr = np.ma.masked_invalid(arr)
+    mean = np.mean(arr)
+    stddev = np.var(arr) ** 0.5
+    np.clip(arr, 0, mean + stddevs * stddev, out=arr)
+    arr = np.ma.filled(arr, 0)
+    scipy.ndimage.gaussian_filter(arr, blur, output=arr)
+    np.clip(arr, mean * 0.01, mean + stddevs * stddev, out=arr)
+    return arr
 
 def create_folders(folders):
     """

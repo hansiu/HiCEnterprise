@@ -90,7 +90,7 @@ class Extractor:
                     pval = 1.0
                 pvalue_matrix[i, j] = pval
 
-                if pval < self.threshold and pval != 0:
+                if pval < self.threshold:
                     sigs.append((i, j, pval))
 
         logger.info('FDR correcting the pvalues')
@@ -101,7 +101,7 @@ class Extractor:
         for i in range(domain_matrix.shape[0]):
             for j in range(domain_matrix.shape[1]):
                 pval = corrected[i,j]
-                if pval < self.threshold and pval != 0:
+                if pval < self.threshold:
                     corr_sigs.append((i, j, pval))
 
         return sigs,corr_sigs
