@@ -66,16 +66,17 @@ class Plotter:
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
+        sns.set_style("ticks", {'xtick.direction': 'in', 'ytick.direction': 'in'})
+        #sns.despine(right=True)
         plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
         plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
-        sns.set_style("ticks")
-        sns.despine(right=True)
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         len_ma = self.hicmap.shape[0]
-        if ticks_separ != 0:
+        if self.ticks_separ != 0:
             plt.xticks(np.arange(0, len_ma, self.ticks_separ))
-        else pass
+            plt.yticks(np.arange(0, len_ma, self.ticks_separ))
+        else: pass
         plt.title(self.plot_title, fontsize=7)
         #ax = sns.heatmap(np.tril(self.hicmap), cmap="Reds", cbar = True)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
@@ -105,19 +106,15 @@ parser.add_argument('-s', '--stats_folder', help="Folder to load the significant
                     default='../stats/')
 parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
-parser.add_argument('-p', '--plot_title', type=str, help="The title of the plot",
+parser.add_argument('-l', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
-parser.add_argument('-d', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
+parser.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
 
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
-<<<<<<< HEAD
     p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation)
-=======
-    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold)
->>>>>>> f3881bbd0ae63217acc1362c253760f7163eee8d
     p.run(args.figures_folder)
 
 

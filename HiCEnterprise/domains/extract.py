@@ -23,7 +23,7 @@ class Extractor:
     Performs all extracting of significant contact frequencies from provided maps, domains and arguments.
     """
 
-    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold):
+    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
@@ -34,6 +34,9 @@ class Extractor:
         self.hicmap = load_hicmap(self.hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
         self.hic_name = os.path.basename(self.hic_folder)
         self.threshold = threshold
+        self.plot_title = plot_title
+        self.ticks_separ = ticks_separ
+        
 
     def _load_domains(self, domain_file):
         logger.info('Loading Domains: ' + domain_file)
@@ -75,7 +78,8 @@ class Extractor:
         """
         logger.info('Calculating the probability of inter-domain contacts (this may take some time...)')
         sigs = []
-        n = np.sum(domain_matrix)
+        #n = np.sum(domain_matrix)
+        n = np.sum(np.triu(domain_matrix))
         pvalue_matrix = np.zeros(domain_matrix.shape)
         for i in range(domain_matrix.shape[0]):
             a = sum(domain_matrix[i][:])
@@ -139,5 +143,5 @@ class Extractor:
         if plotting is not False:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
-            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold)
+            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title, self.ticks_separ)
             p.run(figures_folder)
