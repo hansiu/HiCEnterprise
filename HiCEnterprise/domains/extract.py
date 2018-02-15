@@ -23,7 +23,7 @@ class Extractor:
     Performs all extracting of significant contact frequencies from provided maps, domains and arguments.
     """
 
-    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ):
+    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ, hic_color, inter_color):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
@@ -36,6 +36,8 @@ class Extractor:
         self.threshold = threshold
         self.plot_title = plot_title
         self.ticks_separ = ticks_separ
+        self.hic_color = hic_color
+        self.inter_color = inter_color
         
 
     def _load_domains(self, domain_file):
@@ -143,5 +145,5 @@ class Extractor:
         if plotting is not False:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
-            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title, self.ticks_separ)
+            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title, self.ticks_separ, self.hic_color, self.inter_color)
             p.run(figures_folder)

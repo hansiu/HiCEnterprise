@@ -20,7 +20,7 @@ def exec_domains(args):
     execute domains analysis
     """
     from .domains.extract import Extractor
-    e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold, args.plot_title, args.ticks_separation)
+    e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold, args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color)
     e.run(args.stats_folder, args.plotting, args.figures_folder)
 
 
@@ -96,6 +96,14 @@ parser_domains.add_argument('--sherpa_lvl', help="If there are sherpa levels in 
 parser_domains.add_argument('-l', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
 parser_domains.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
+parser_domains.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Blues'", 
+                    default='Blues')
+parser_domains.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Reds'",
+                    default='Reds')
+#parser_domains.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Blues'", 
+                    #choices=['Reds','Blues','YlOrBr', 'GnBu'], default='Blues')
+#parser_domains.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Reds'",
+                    #choices=['Reds','Blues','YlOrBr', 'GnBu'], default='Reds')
 
 
 def main():

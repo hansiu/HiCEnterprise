@@ -7,7 +7,7 @@ import numpy as np
 import csv
 import matplotlib
 matplotlib.use('Agg')
-import seaborn as sns
+#import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from ..utils import load_hicmap, create_folders, clip_and_blur
@@ -18,7 +18,7 @@ class Plotter:
     Plots domain interaction maps with matplotlib.
     """
 
-    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ):
+    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color, inter_color):
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
@@ -30,6 +30,8 @@ class Plotter:
         self.interactions = self._get_interactions(stats_folder, interactions)
         self.interactions_name = os.path.basename(os.path.abspath(interactions))
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
+        self.hic_color = hic_color
+        self.inter_color = inter_color
 
     def _get_interactions(self, stats_folder, filename, corr=""):
         name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
@@ -66,10 +68,10 @@ class Plotter:
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
-        sns.set_style("ticks", {'xtick.direction': 'in', 'ytick.direction': 'in'})
+        #sns.set_style("ticks", {'xtick.direction': 'in', 'ytick.direction': 'in'})
         #sns.despine(right=True)
-        plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap="Blues", interpolation='nearest')
-        plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap="Reds", interpolation='nearest')
+        plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap=self.hic_color, interpolation='nearest')
+        plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap=self.inter_color, interpolation='nearest')
         plt.colorbar()
         plt.axis([0, self.hicmap.shape[0], 0, self.hicmap.shape[0]])
         len_ma = self.hicmap.shape[0]
@@ -109,12 +111,20 @@ parser.add_argument('-t', '--threshold', type=float, help="Threshold that was us
 parser.add_argument('-l', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
 parser.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
+parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Blues'", 
+                    default='Oranges')
+parser.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Reds'",
+                    default='YlOrBr')
+#parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Blues'", 
+                    #choices=['Reds','Blues','YlOrBr', 'PuBu'], default='Blues')
+#parser.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Reds'",
+                    #choices=['Reds','Blues','YlOrBr', 'PuBu'], default='Reds')
 
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
-    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation)
+    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color)
     p.run(args.figures_folder)
 
 
