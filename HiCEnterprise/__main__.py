@@ -96,14 +96,11 @@ parser_domains.add_argument('--sherpa_lvl', help="If there are sherpa levels in 
 parser_domains.add_argument('-l', '--plot_title', type=str, help="The title of the plot",
                     default='Interactions')
 parser_domains.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
-parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'Greens'", 
+parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'Greens'", 
                     default='Greens')
-parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'YlOrBr'",
+parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option. Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'YlOrBr'",
                     default='YlOrBr')
-#parser_domains.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Blues'", 
-                    #choices=['Reds','Blues','YlOrBr', 'GnBu'], default='Blues')
-#parser_domains.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr). Default is 'Reds'",
-                    #choices=['Reds','Blues','YlOrBr', 'GnBu'], default='Reds')
+
 
 
 def main():

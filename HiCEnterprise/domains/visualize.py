@@ -7,7 +7,6 @@ import numpy as np
 import csv
 import matplotlib
 matplotlib.use('Agg')
-#import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from ..utils import load_hicmap, create_folders, clip_and_blur
@@ -68,8 +67,6 @@ class Plotter:
         """
         Plots the interaction map - Hi-C in one triangle and interaction matrix in the other
         """
-        #sns.set_style("ticks", {'xtick.direction': 'in', 'ytick.direction': 'in'})
-        #sns.despine(right=True)
         plt.imshow(np.tril(self.hicmap), origin='lower', norm=LogNorm(), cmap=self.hic_color, interpolation='nearest')
         plt.imshow(interaction_matrix, origin='lower', norm=LogNorm(), cmap=self.inter_color, interpolation='nearest')
         plt.colorbar()
@@ -80,7 +77,6 @@ class Plotter:
             plt.yticks(np.arange(0, len_ma, self.ticks_separ))
         else: pass
         plt.title(self.plot_title, fontsize=7)
-        #ax = sns.heatmap(np.tril(self.hicmap), cmap="Reds", cbar = True)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
         plt.close()
@@ -113,12 +109,8 @@ parser.add_argument('-l', '--plot_title', type=str, help="The title of the plot"
 parser.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
 parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'Greens'", 
                     default='Greens')
-parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'YlOrBr'",
+parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option. Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'YlOrBr'",
                     default='YlOrBr')
-#parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Blues'", 
-                    #choices=['Reds','Blues','YlOrBr', 'PuBu'], default='Blues')
-#parser.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use one of allowed options (Reds, Blues,YlOrBr, PuBu). Default is 'Reds'",
-                    #choices=['Reds','Blues','YlOrBr', 'PuBu'], default='Reds')
 
 
 # Main
