@@ -80,7 +80,6 @@ class Extractor:
         """
         logger.info('Calculating the probability of inter-domain contacts (this may take some time...)')
         sigs = []
-        #n = np.sum(domain_matrix)
         n = np.sum(np.triu(domain_matrix))
         pvalue_matrix = np.zeros(domain_matrix.shape)
         for i in range(domain_matrix.shape[0]):

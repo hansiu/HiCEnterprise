@@ -93,7 +93,7 @@ parser_domains.add_argument('--plotting', help="Plot results. You'll need matplo
                             action="store_true")
 parser_domains.add_argument('--sherpa_lvl', help="If there are sherpa levels in the file and which one to use",
                             type=int)
-parser_domains.add_argument('-l', '--plot_title', type=str, help="The title of the plot",
+parser_domains.add_argument('-l', '--plot_title', type=str, help="The title of the plot. If it contains spaces, use quotation marks.",
                     default='Interactions')
 parser_domains.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
 parser_domains.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'Greens'", 
