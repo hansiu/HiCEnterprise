@@ -22,8 +22,13 @@ class TestExtractor():
         sherpa_lvl = 1
         hic_folder = TEST_DIR + '/test_files/maps/'
         threshold = 0.01
+        plot_title = "Plot"
+        ticks_separation = 0
+        hic_color = 'Reds'
+        interactions_color = "Blues"
 
-        e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold)
+        e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separation,
+                      hic_color, interactions_color)
         return (e)
 
     def test_init(self):
@@ -38,6 +43,10 @@ class TestExtractor():
         assert e.hic_folder == TEST_DIR + '/test_files/maps'
         assert e.hic_name == 'maps'
         assert e.threshold == 0.01
+        assert e.plot_title == "Plot"
+        assert e.ticks_separ == 0
+        assert e.hic_color == 'Reds'
+        assert e.inter_color == "Blues"
         assert e.hicmap.shape == (100, 100)
 
     def test_check_overlap_bad(self):
@@ -58,10 +67,10 @@ class TestExtractor():
     def test_calc(self):
         e = self.create()
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
-        assert len(sigs) == 121
-        assert len(corr_sigs) == 111
-        assert sigs[0] == (5, 8, pytest.approx(0))
-        assert corr_sigs[1] == (5, 9, pytest.approx(0))
+        assert len(sigs) == 100
+        assert len(corr_sigs) == 100
+        assert sigs[0] == (5, 6, pytest.approx(0))
+        assert corr_sigs[1] == (5, 7, pytest.approx(0))
 
     def test_plotting(self):
         e = self.create()
