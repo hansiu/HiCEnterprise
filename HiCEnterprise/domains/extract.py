@@ -48,11 +48,28 @@ class Extractor:
         domain_file = open(domain_file, 'r')
         reader = csv.reader(domain_file, delimiter=' ')
         domains = []
+        warned = False
         for row in reader:
+            if len(row) > 5 and not warned:
+                logger.warning(
+                    'There are more than 5 columns in the input domains. This may suggest that your input domains '
+                    'are in the wrong format.')
+                warned = True
+            if len(row) < 4:
+                logger.critical('There is something wrong with the input domains: not enough columns.')
+                sys.exit(1)
+
+            try:
+                row = [int(row[0]), str(row[1]).lstrip('chr')] + list(map(int, row[2:5]))
+            except ValueError:
+                logger.critical(
+                    'There is something wrong with the input domains: columns are in the wrong format (should be '
+                    'integers).')
+                sys.exit(1)
             if row[1] == self.chr:
-                if (not self.sherpa_level) or (len(row) >= 5 and row[4] == str(self.sherpa_level)):
+                if (not self.sherpa_level) or (len(row) >= 5 and row[4] == self.sherpa_level):
                     domains.append(
-                        [int(int(row[2]) / self.bin_res), int(int(row[3]) / self.bin_res) - 1])
+                        [int(row[2] / self.bin_res), int(row[3] / self.bin_res) - 1])
         domains = sorted(domains, key=itemgetter(0))
         return domains
 
