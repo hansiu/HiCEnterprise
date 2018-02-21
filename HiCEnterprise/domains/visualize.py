@@ -41,6 +41,7 @@ class Plotter:
                "_".join(str(self.threshold).split('.')) + '.txt'
         interactions_file = open(os.path.abspath(name), 'r')
         interactions = csv.reader(interactions_file, delimiter='\t')
+        next(interactions)  # skip headers
         return interactions
 
     def prepare_interaction_matrix(self, interactions):

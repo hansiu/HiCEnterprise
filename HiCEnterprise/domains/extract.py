@@ -127,6 +127,7 @@ class Extractor:
             stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' +
             "_".join(str(self.threshold).split('.')) + '.txt', 'w')
         stats_writer = csv.writer(stats, delimiter='\t')
+        stats_writer.writerow(['chr', 'd1_start', 'd1_end', 'd2_start', 'd2_end', corr + 'pval'])
         rows = []
         for sig in sigs:
             rows.append([self.chr] + self._get_coordinates(self.domains[sig[0]]) + self._get_coordinates(
