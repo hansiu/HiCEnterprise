@@ -8,7 +8,8 @@ logging.disable(logging.CRITICAL)
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class Test_create_folders():
+
+class Test_create_folders:
     @pytest.fixture(autouse=True)
     def setup(self, tmpdir):
         self.tmpdir = tmpdir.strpath
@@ -19,7 +20,7 @@ class Test_create_folders():
         assert os.path.exists(paths[0])
 
 
-class Test_load_hicmap():
+class Test_load_hicmap:
     @pytest.fixture(autouse=True)
     def setup(self, tmpdir):
         self.tmpdir = tmpdir.strpath

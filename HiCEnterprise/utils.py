@@ -25,6 +25,7 @@ def clip_and_blur(arr, stddevs=5, blur=1):
     np.clip(arr, mean * 0.01, mean + stddevs * stddev, out=arr)
     return arr
 
+
 def create_folders(folders):
     """
     Creates necessary folders if they are not there already and returns the full paths.
@@ -48,5 +49,5 @@ def load_hicmap(hic_folder, filename):
     logger.info('Loading Hic-Map: ' + name)
     hicmap = np.load(os.path.abspath(name))
     if not np.allclose(hicmap.transpose(), hicmap):
-        logger.warn('This map is not too symmetric')
+        logger.warning('This map is not too symmetric')
     return hicmap

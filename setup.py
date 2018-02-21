@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-
 if __name__ == '__main__':
     setup(
         name='HiCEnterprise',
@@ -13,7 +12,7 @@ if __name__ == '__main__':
         description='Scripts for prediction of interaction between regions/domains based on Hi-C maps',
         long_description=open('README.md').read(),
         entry_points={'console_scripts': ['HiCEnterprise=HiCEnterprise.__main__:main']},
-        keywords=['bioinformatics','hi-c','interactions','regions','domains','chromatin'],
+        keywords=['bioinformatics', 'hi-c', 'interactions', 'regions', 'domains', 'chromatin'],
         classifiers=[
             'Development Status :: 2 - Pre-Alpha'
             'Environment :: Console',
@@ -26,12 +25,12 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3.6',
             'Topic :: Scientific/Engineering :: Bio-Informatics'
         ],
-         install_requires=[
-             "numpy",
-             "scipy",
-             "statsmodels",
-             "matplotlib"
-         ],
+        install_requires=[
+            "numpy",
+            "scipy",
+            "statsmodels",
+            "matplotlib"
+        ],
         setup_requires=['pytest-runner'],
         tests_require=['pytest'],
 

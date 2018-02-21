@@ -4,13 +4,13 @@ import os
 import numpy as np
 
 from HiCEnterprise.regions.extract import Bin, HiCmap, Extractor
-from HiCEnterprise.regions.visualize import Plotter
 
 logging.disable(logging.CRITICAL)
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class TestBin():
+
+class TestBin:
     def test_init(self):
         positions = [(10, 11), (11, 12)]
 
@@ -19,7 +19,7 @@ class TestBin():
         assert b.positions == positions
 
 
-class TestHiCmap():
+class TestHiCmap:
     @pytest.fixture(autouse=True)
     def setup(self, tmpdir):
         self.tmpdir = tmpdir.strpath
@@ -52,16 +52,17 @@ class TestHiCmap():
         assert h.map is not None
 
     def test_get_means(self):
-        expected_means = {-2:70.018349,-1:1,0:1,1:1,2:70.018349}
+        expected_means = {-2: 70.018349, -1: 1, 0: 1, 1: 1, 2: 70.018349}
 
         h = HiCmap(TEST_DIR + '/test_files/maps/fbd', '12')
         assert not h.means
         h.get_means(2)
-        assert len(h.means)==len(expected_means)
+        assert len(h.means) == len(expected_means)
         assert h.means == pytest.approx(expected_means)
 
     def test_get_Weibull_fits(self):
-        expected_fits = {-2: (2.166370, 2.259363, 0, 66.175952), -1: None, 0: None, 1: None, 2: (2.166370, 2.259363, 0, 66.175952)}
+        expected_fits = {-2: (2.166370, 2.259363, 0, 66.175952), -1: None, 0: None, 1: None,
+                         2: (2.166370, 2.259363, 0, 66.175952)}
 
         h = HiCmap(TEST_DIR + '/test_files/maps/fbd', '12')
         assert not h.fits
@@ -71,7 +72,7 @@ class TestHiCmap():
             assert h.fits[fit] == pytest.approx(expected_fits[fit])
 
 
-class TestExtractor():
+class TestExtractor:
     @pytest.fixture(autouse=True)
     def setup(self, tmpdir):
         self.tmpdir = tmpdir.strpath
@@ -88,13 +89,13 @@ class TestExtractor():
         e = Extractor(region, hicmaps, chrom, resolution, bins, threshold, p_folder,
                       f_folder, s_folder)
 
-        return (e)
+        return e
 
     def test_init(self):
         e = self.create()
         assert e.regions_name == 'Fetal_brain'
         assert len(e.maps) == 1
-        assert isinstance(e.maps[0],HiCmap)
+        assert isinstance(e.maps[0], HiCmap)
         assert e.chr == '12'
         assert e.bin_res == 10000
         assert e.num_bins == 5

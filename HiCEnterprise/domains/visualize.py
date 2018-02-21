@@ -2,10 +2,12 @@
 Script for plotting domain interaction maps.
 Based on code by Irina Tuszynska and Rafal Zaborowski.
 """
-import argparse, os
+import argparse
+import os
 import numpy as np
 import csv
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -17,7 +19,8 @@ class Plotter:
     Plots domain interaction maps with matplotlib.
     """
 
-    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color, inter_color):
+    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color,
+                 inter_color, bin_res):
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
@@ -31,13 +34,14 @@ class Plotter:
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
         self.hic_color = hic_color
         self.inter_color = inter_color
+        self.bin_res = bin_res
 
     def _get_interactions(self, stats_folder, filename, corr=""):
         name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
                "_".join(str(self.threshold).split('.')) + '.txt'
         interactions_file = open(os.path.abspath(name), 'r')
         interactions = csv.reader(interactions_file, delimiter='\t')
-        return (interactions)
+        return interactions
 
     def prepare_interaction_matrix(self, interactions):
         """
@@ -46,22 +50,21 @@ class Plotter:
         """
         i_m = np.zeros((self.hicmap.shape[0], self.hicmap.shape[0]))
         for l in interactions:
-            start1 = float(l[1])
-            end1 = (float(l[2])) - 1
-            start2 = float(l[3])
-            end2 = (float(l[4])) - 1
+            start1 = int(int(l[1]) / self.bin_res)
+            end1 = int(int(l[2]) / self.bin_res) - 1
+            start2 = int(int(l[3]) / self.bin_res)
+            end2 = int(int(l[4]) / self.bin_res) - 1
             dom1 = (start1, end1)
             dom2 = (start2, end2)
             if dom1 == dom2:
-                i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 0.0
+                i_m[dom1[0]:dom1[1] + 1, dom2[0]:dom2[1] + 1] = 0.0
             else:
-                if float(l[5])!= 0.0:
-                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = round(-np.log10(float(l[5])),5)
+                if float(l[5]) != 0.0:
+                    i_m[dom1[0]:dom1[1] + 1, dom2[0]:dom2[1] + 1] = round(-np.log10(float(l[5])), 5)
                 else:
-                    i_m[int(dom1[0]):int(dom1[1]) + 1, int(dom2[0]):int(dom2[1]) + 1] = 500 # some big number here
+                    i_m[dom1[0]:dom1[1] + 1, dom2[0]:dom2[1] + 1] = 500  # some big number here
 
         return np.triu(i_m)
-
 
     def plot(self, interaction_matrix, figures_folder, corr=""):
         """
@@ -75,7 +78,8 @@ class Plotter:
         if self.ticks_separ != 0:
             plt.xticks(np.arange(0, len_ma, self.ticks_separ))
             plt.yticks(np.arange(0, len_ma, self.ticks_separ))
-        else: pass
+        else:
+            pass
         plt.title(self.plot_title, fontsize=7)
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
@@ -104,20 +108,28 @@ parser.add_argument('-s', '--stats_folder', help="Folder to load the significant
                     default='../stats/')
 parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
-parser.add_argument('-l', '--plot_title', type=str, help="The title of the plot. If it contains spaces, use quotation marks.",
+parser.add_argument('-l', '--plot_title', type=str,
+                    help="The title of the plot. If it contains spaces, use quotation marks.",
                     default='Interactions')
 parser.add_argument('-e', '--ticks_separation', type=int, help="Frequency of ticks on the plot", default=0)
-parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'Greens'", 
+parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, use your favorite from "
+                                                        "https://matplotlib.org/api/pyplot_summary.html described as a "
+                                                        "Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. "
+                                                        "Default is 'Greens'",
                     default='Greens')
-parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from https://matplotlib.org/api/pyplot_summary.html described as a Colormap option. Recommended: Reds, Blues,YlOrBr, PuBu. Default is 'YlOrBr'",
+parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from "
+                                                                 "https://matplotlib.org/api/pyplot_summary.html "
+                                                                 "described as a Colormap option. Recommended: Reds, "
+                                                                 "Blues, YlOrBr, PuBu. Default is 'YlOrBr'",
                     default='YlOrBr')
-
+parser.add_argument('-b', '--bin_res', help='Resolution (size of the bins on the hicmaps) in bp i.e. 10000 for 10kb'
+                                            ' resolution', type=int, required=True)
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
-    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color)
+    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title,
+                args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res)
     p.run(args.figures_folder)
-
 
 # TODO add TAD plotting

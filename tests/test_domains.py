@@ -4,18 +4,19 @@ import os
 import numpy as np
 
 from HiCEnterprise.domains.extract import Extractor
-from HiCEnterprise.domains.visualize import Plotter
 
 logging.disable(logging.CRITICAL)
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class TestExtractor():
+
+class TestExtractor:
     @pytest.fixture(autouse=True)
     def setup(self, tmpdir):
         self.tmpdir = tmpdir.strpath
 
-    def create(self):
+    @staticmethod
+    def create():
         domain_file = TEST_DIR + '/test_files/doms/sherpa-tads'
         chrom = '1'
         bin_res = 150000
@@ -29,7 +30,7 @@ class TestExtractor():
 
         e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separation,
                       hic_color, interactions_color)
-        return (e)
+        return e
 
     def test_init(self):
         e = self.create()
@@ -65,6 +66,7 @@ class TestExtractor():
         assert domain_matrix.shape == (len(e.domains), len(e.domains))
 
     def test_calc(self):
+        # TODO failing now - fix when the decision is made about the sum of contacts and symm
         e = self.create()
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
         assert len(sigs) == 100

@@ -23,7 +23,8 @@ class Extractor:
     Performs all extracting of significant contact frequencies from provided maps, domains and arguments.
     """
 
-    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ, hic_color, inter_color):
+    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ,
+                 hic_color, inter_color):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
@@ -31,14 +32,16 @@ class Extractor:
         self.domains = self._load_domains(domain_file)
         self._check_overlap()
         self.hic_folder = os.path.abspath(hic_folder)
-        self.hicmap = load_hicmap(self.hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy')
+        self.hicmap = self._symm(load_hicmap(self.hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
         self.hic_name = os.path.basename(self.hic_folder)
         self.threshold = threshold
         self.plot_title = plot_title
         self.ticks_separ = ticks_separ
         self.hic_color = hic_color
         self.inter_color = inter_color
-        
+
+    def _symm(self, hicmap):
+        return ((hicmap + np.transpose(hicmap)) / 2)
 
     def _load_domains(self, domain_file):
         logger.info('Loading Domains: ' + domain_file)
@@ -87,7 +90,7 @@ class Extractor:
             for j in range(domain_matrix.shape[1]):
                 b = sum(domain_matrix[j][:])
                 model = ss.hypergeom(n, a, b)
-                expected = (a*b)/n
+                expected = (a * b) / n
                 k = domain_matrix[i][j]
                 if expected and k:
                     pval = model.sf(k)
@@ -105,11 +108,11 @@ class Extractor:
         corr_sigs = []
         for i in range(domain_matrix.shape[0]):
             for j in range(domain_matrix.shape[1]):
-                pval = corrected[i,j]
+                pval = corrected[i, j]
                 if pval < self.threshold:
                     corr_sigs.append((i, j, pval))
 
-        return sigs,corr_sigs
+        return sigs, corr_sigs
 
     def save_sigs(self, sigs, stats_folder, corr=""):
         """
@@ -118,19 +121,20 @@ class Extractor:
         """
         stats_folder = create_folders([stats_folder])[0]
         logger.debug(
-            'Saving stats file: ' + stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + "_".join(
-                str(
-                    self.threshold).split('.')) + '.txt')
+            'Saving stats file: ' + stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr +
+            'stats' + self.chr + '-' + "_".join(str(self.threshold).split('.')) + '.txt')
         stats = open(
-            stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + "_".join(
-                str(
-                self.threshold).split('.')) + '.txt',
-                     'w')
+            stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' +
+            "_".join(str(self.threshold).split('.')) + '.txt', 'w')
         stats_writer = csv.writer(stats, delimiter='\t')
         rows = []
         for sig in sigs:
-            rows.append([self.chr] + self.domains[sig[0]] + self.domains[sig[1]] + [sig[2]])
+            rows.append([self.chr] + self._get_coordinates(self.domains[sig[0]]) + self._get_coordinates(
+                self.domains[sig[1]]) + [sig[2]])
         stats_writer.writerows(rows)
+
+    def _get_coordinates(self, domain):
+        return [domain[0] * self.bin_res, (domain[1] + 1) * self.bin_res]
 
     def run(self, stats_folder, plotting, figures_folder):
         """
@@ -144,5 +148,6 @@ class Extractor:
         if plotting is not False:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
-            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title, self.ticks_separ, self.hic_color, self.inter_color)
+            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title,
+                        self.ticks_separ, self.hic_color, self.inter_color, self.bin_res)
             p.run(figures_folder)
