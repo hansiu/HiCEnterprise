@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 if __name__ == '__main__':
     setup(
         name='HiCEnterprise',
-        version='0.1.2-1',
+        version='0.1.2-2',
         author='Hania Kranas',
         packages=find_packages(exclude=['tests']),
         include_package_data=True,

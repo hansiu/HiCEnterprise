@@ -179,5 +179,4 @@ class TestExtractor:
         regs_algorithm = 'all'
         stat_formats = ['txt']
         e.run(region_file, num_regs, section, plotting, single_sig, remap, regs_algorithm, stat_formats)
-
-        assert os.path.exists(self.tmpdir + '/figures/Fetal_brain-fbd-12-340000-690000-3.pdf')
+        assert os.path.exists(self.tmpdir + '/figures/Fetal_brain-fbd-12-5-340000-690000-3.pdf')

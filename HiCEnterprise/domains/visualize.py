@@ -20,7 +20,7 @@ class Plotter:
     """
 
     def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color,
-                 inter_color, bin_res):
+                 inter_color, bin_res, distribution):
         hic_folder = os.path.abspath(hic_folder)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
@@ -29,6 +29,7 @@ class Plotter:
         self.threshold = threshold
         self.plot_title = plot_title
         self.ticks_separ = ticks_separ
+        self.distribution = distribution
         self.interactions = self._get_interactions(stats_folder, interactions)
         self.interactions_name = os.path.basename(os.path.abspath(interactions))
         self.corr_interactions = self._get_interactions(stats_folder, interactions, corr="corr_")
@@ -38,7 +39,7 @@ class Plotter:
 
     def _get_interactions(self, stats_folder, filename, corr=""):
         name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
-               "_".join(str(self.threshold).split('.')) + '.txt'
+               "_".join(str(self.threshold).split('.')) + '-' + self.distribution + '.txt'
         interactions_file = open(os.path.abspath(name), 'r')
         interactions = csv.reader(interactions_file, delimiter='\t')
         next(interactions)  # skip headers
@@ -82,7 +83,8 @@ class Plotter:
         else:
             pass
         plt.title(self.plot_title, fontsize=7)
-        output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[0] + ".png"
+        output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[
+            0] + '-' + self.distribution + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
         plt.close()
 
@@ -125,12 +127,16 @@ parser.add_argument('-r', '--interactions_color', type=str, help="The color of H
                     default='YlOrBr')
 parser.add_argument('-b', '--bin_res', help='Resolution (size of the bins on the hicmaps) in bp i.e. 10000 for 10kb'
                                             ' resolution', type=int, required=True)
+parser.add_argument('--distribution', type=str,
+                    help="The distribution on which identification of domain-domain interactions was based."
+                         " Available: hypergeom, negbinom, poisson. Default: hypergeom",
+                    default='hypergeom')
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
     p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title,
-                args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res)
+                args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res, args.distribution)
     p.run(args.figures_folder)
 
 # TODO add TAD plotting

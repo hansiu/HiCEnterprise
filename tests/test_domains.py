@@ -16,7 +16,7 @@ class TestExtractor:
         self.tmpdir = tmpdir.strpath
 
     @staticmethod
-    def create():
+    def create(distribution='hypergeom'):
         domain_file = TEST_DIR + '/test_files/doms/sherpa-tads'
         chrom = '1'
         bin_res = 150000
@@ -29,7 +29,7 @@ class TestExtractor:
         interactions_color = "Blues"
 
         e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separation,
-                      hic_color, interactions_color)
+                      hic_color, interactions_color, distribution)
         return e
 
     def test_init(self):
@@ -49,6 +49,7 @@ class TestExtractor:
         assert e.hic_color == 'Reds'
         assert e.inter_color == "Blues"
         assert e.hicmap.shape == (100, 100)
+        assert e.distribution == 'hypergeom'
 
     def test_check_overlap_bad(self):
         e = self.create()
@@ -65,7 +66,7 @@ class TestExtractor:
         print("domains", e.domains)
         assert domain_matrix.shape == (len(e.domains), len(e.domains))
 
-    def test_calc(self):
+    def test_calc_hypergeom(self):
         # TODO failing now - fix when the decision is made about the sum of contacts and symm
         e = self.create()
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
@@ -74,8 +75,27 @@ class TestExtractor:
         assert sigs[0] == (5, 6, pytest.approx(0))
         assert corr_sigs[1] == (5, 7, pytest.approx(0))
 
+    def test_calc_negbinom(self):
+        # TODO failing now - fix when the decision is made about the sum of contacts and symm
+        e = self.create('negbinom')
+        sigs, corr_sigs = e.calc(e.create_domain_matrix())
+        assert len(sigs) == 70
+        assert len(corr_sigs) == 59
+        assert sigs[0] == (5, 17, pytest.approx(0, abs=1e-8))
+        assert corr_sigs[1] == (5, 31, pytest.approx(0.0066, abs=1e-3))
+
+    def test_calc_poisson(self):
+        # TODO failing now - fix when the decision is made about the sum of contacts and symm
+        e = self.create('poisson')
+        sigs, corr_sigs = e.calc(e.create_domain_matrix())
+        assert len(sigs) == 106
+        assert len(corr_sigs) == 94
+        assert sigs[0] == (5, 7, pytest.approx(0))
+        assert corr_sigs[1] == (5, 17, pytest.approx(0))
+
+
     def test_plotting(self):
         e = self.create()
         e.run(self.tmpdir + '/stats/', True, self.tmpdir + '/figures/')
-        assert os.path.exists(self.tmpdir + '/stats/sherpa-tads-maps-stats1-0_01.txt')
-        assert os.path.exists(self.tmpdir + '/figures/maps-sherpa-tads.png')
+        assert os.path.exists(self.tmpdir + '/stats/sherpa-tads-maps-stats1-0_01-hypergeom.txt')
+        assert os.path.exists(self.tmpdir + '/figures/maps-sherpa-tads-hypergeom.png')

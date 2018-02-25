@@ -24,7 +24,7 @@ class Extractor:
     """
 
     def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ,
-                 hic_color, inter_color):
+                 hic_color, inter_color, distribution):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
@@ -39,6 +39,7 @@ class Extractor:
         self.ticks_separ = ticks_separ
         self.hic_color = hic_color
         self.inter_color = inter_color
+        self.distribution = distribution
 
     def _symm(self, hicmap):
         return ((hicmap + np.transpose(hicmap)) / 2)
@@ -98,7 +99,23 @@ class Extractor:
         Calculates statistical signigicance of inter-domain contacts using hypergeometric test.
         :param domain_matrix: Matrix with frequencies of contacts between domains
         """
-        logger.info('Calculating the probability of inter-domain contacts (this may take some time...)')
+        logger.info('Calculating the probability of inter-domain contacts with ' + self.distribution + ' distribution '
+                                                                                                       '(this may take some time...)')
+
+        if self.distribution == 'hypergeom':
+            sigs, corr_sigs = self._calc_hypergeom(domain_matrix)
+        elif self.distribution == 'negbinom':
+            sigs, corr_sigs = self._calc_negbinom(domain_matrix)
+        elif self.distribution == 'poisson':
+            sigs, corr_sigs = self._calc_poisson(domain_matrix)
+        else:
+            logger.error('The chosen distribution ' + self.distribution + ' is not available. Choose from: hypergeom, '
+                                                                          'negbinom, poisson')
+            sys.exit(1)
+
+        return sigs, corr_sigs
+
+    def _calc_hypergeom(self, domain_matrix):
         sigs = []
         n = np.sum(np.triu(domain_matrix))
         pvalue_matrix = np.zeros(domain_matrix.shape)
@@ -118,18 +135,100 @@ class Extractor:
                 if pval < self.threshold:
                     sigs.append((i, j, pval))
 
+        return sigs, self._fdr_correct(pvalue_matrix, domain_matrix.shape)
+
+    def _calc_negbinom(self, domain_matrix):
+        sigs = []
+        means = [np.mean(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
+        lens = [len(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
+
+        def sum_mean(i, j):
+            """
+            Counts the mean across several consecutive diagonals in the hicmap
+            """
+            s = sum([m * l for (m, l) in list(zip(means, lens))[i:j]])
+            l = sum(lens[i:j])
+            return s / l
+
+        def sum_var(i, j, m):
+            """
+            Counts the variance in several consecutive diagonals given their mean
+            """
+            mses = [np.mean((self.hicmap.diagonal(i) - m) ** 2) for i in range(i, j)]
+            s = sum([m * l for (m, l) in zip(mses, lens[i:j])])
+            l = sum(lens[i:j])
+            return s / l
+
+        pvalue_matrix = np.ones(domain_matrix.shape)
+
+        for i in range(domain_matrix.shape[0]):
+            li = self.domains[i][1] - self.domains[i][0] + 1
+            for j in range(i + 1, domain_matrix.shape[1]):
+                lj = self.domains[j][1] - self.domains[j][0] + 1
+                dist = self.domains[j][0] - self.domains[i][1]
+                span = self.domains[j][1] - self.domains[i][0] + 1
+                expected = sum_mean(dist, span)
+                var = sum_var(dist, span, expected)
+                mean = expected * li * lj
+                if var < mean:
+                    var = mean + 1
+                k = domain_matrix[i][j]
+                r = mean ** 2 / (var - mean) if (var - mean) != 0 else np.nan
+                p = (var - mean) / var if var != 0 else np.nan
+                model = ss.nbinom(n=r, p=1 - p)
+                if expected and k:
+                    pval = model.sf(k)
+                    pvalue_matrix[i, j] = pval
+                    if pval < self.threshold:
+                        sigs.append((i, j, pval))
+
+        return sigs, self._fdr_correct(pvalue_matrix, domain_matrix.shape)
+
+    def _calc_poisson(self, domain_matrix):
+        sigs = []
+        means = [np.mean(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
+        lens = [len(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
+
+        def sum_mean(i, j):
+            """
+            Counts the mean across several consecutive diagonals in the hicmap
+            """
+            s = sum([m * l for (m, l) in list(zip(means, lens))[i:j]])
+            l = sum(lens[i:j])
+            return s / l
+
+        pvalue_matrix = np.ones(domain_matrix.shape)
+
+        for i in range(domain_matrix.shape[0]):
+            li = self.domains[i][1] - self.domains[i][0] + 1
+            for j in range(i + 1, domain_matrix.shape[1]):
+                lj = self.domains[j][1] - self.domains[j][0] + 1
+                dist = self.domains[j][0] - self.domains[i][1]
+                span = self.domains[j][1] - self.domains[i][0] + 1
+                expected = sum_mean(dist, span) * li * lj
+                k = domain_matrix[i][j]
+                model = ss.poisson(expected)
+                if expected and k:
+                    pval = model.sf(k)
+                    pvalue_matrix[i, j] = pval
+                    if pval < self.threshold:
+                        sigs.append((i, j, pval))
+
+        return sigs, self._fdr_correct(pvalue_matrix, domain_matrix.shape)
+
+    def _fdr_correct(self, pvalue_matrix, dom_shape):
         logger.info('FDR correcting the pvalues')
 
-        corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(domain_matrix.shape)
+        corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(dom_shape)
 
         corr_sigs = []
-        for i in range(domain_matrix.shape[0]):
-            for j in range(domain_matrix.shape[1]):
+        for i in range(dom_shape[0]):
+            for j in range(dom_shape[1]):
                 pval = corrected[i, j]
                 if pval < self.threshold:
                     corr_sigs.append((i, j, pval))
 
-        return sigs, corr_sigs
+        return corr_sigs
 
     def save_sigs(self, sigs, stats_folder, corr=""):
         """
@@ -139,10 +238,10 @@ class Extractor:
         stats_folder = create_folders([stats_folder])[0]
         logger.debug(
             'Saving stats file: ' + stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr +
-            'stats' + self.chr + '-' + "_".join(str(self.threshold).split('.')) + '.txt')
+            'stats' + self.chr + '-' + "_".join(str(self.threshold).split('.')) + '-' + self.distribution + '.txt')
         stats = open(
             stats_folder + '/' + self.domains_name + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' +
-            "_".join(str(self.threshold).split('.')) + '.txt', 'w')
+            "_".join(str(self.threshold).split('.')) + '-' + self.distribution + '.txt', 'w')
         stats_writer = csv.writer(stats, delimiter='\t')
         stats_writer.writerow(['chr', 'd1_start', 'd1_end', 'd2_start', 'd2_end', corr + 'pval'])
         rows = []
@@ -167,128 +266,5 @@ class Extractor:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
             p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title,
-                        self.ticks_separ, self.hic_color, self.inter_color, self.bin_res)
+                        self.ticks_separ, self.hic_color, self.inter_color, self.bin_res, self.distribution)
             p.run(figures_folder)
-
-
-class PoissonExtractor(Extractor):
-    """
-    The extractor of domain-domain interactions based on Poisson distribution
-    """
-    def calc(self, domain_matrix):
-        """
-        Calculates statistical signigicance of inter-domain contacts using negative binomial test.
-        :param domain_matrix: Matrix with frequencies of contacts between domains
-        """
-        logger.info('Calculating the probability of inter-domain contacts (this may take some time...)')
-        sigs = []
-        means=[np.mean(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
-        lens=[len(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
-
-        def sum_mean(i,j):
-            """
-            Counts the mean across several consecutive diagonals in the hicmap
-            """
-            s=sum([m*l for (m,l) in list(zip(means,lens))[i:j]])
-            l=sum(lens[i:j])
-            return s/l
-
-        pvalue_matrix = np.ones(domain_matrix.shape)
-        
-        for i in range(domain_matrix.shape[0]):
-            li=self.domains[i][1]-self.domains[i][0]+1
-            for j in range(i+1,domain_matrix.shape[1]):
-                lj=self.domains[j][1]-self.domains[j][0]+1
-                dist=self.domains[j][0]-self.domains[i][1]
-                span=self.domains[j][1]-self.domains[i][0]+1
-                expected = sum_mean(dist,span)*li*lj
-                k = domain_matrix[i][j]
-                model=ss.poisson(expected)
-                if expected and k:
-                    pval = model.sf(k)
-                    pvalue_matrix[i, j] = pval
-                    if pval < self.threshold:
-                        sigs.append((i, j, pval))
-
-        logger.info('FDR correcting the pvalues')
-
-        corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(domain_matrix.shape)
-
-        corr_sigs = []
-        for i in range(domain_matrix.shape[0]):
-            for j in range(domain_matrix.shape[1]):
-                pval = corrected[i,j]
-                if pval < self.threshold:
-                    corr_sigs.append((i, j, pval))
-
-        return sigs,corr_sigs
-
-
-
-class NegBinomExtractor(Extractor):
-    """
-    The extractor of domain-domain interactions based on Negative binomial distribution
-    """
-    def calc(self, domain_matrix):
-        """
-        Calculates statistical signigicance of inter-domain contacts using negative binomial test.
-        :param domain_matrix: Matrix with frequencies of contacts between domains
-        """
-        logger.info('Calculating the probability of inter-domain contacts (this may take some time...)')
-        sigs = []
-        means=[np.mean(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
-        lens=[len(self.hicmap.diagonal(i)) for i in range(self.hicmap.shape[0])]
-
-        def sum_mean(i,j):
-            """
-            Counts the mean across several consecutive diagonals in the hicmap
-            """
-            s=sum([m*l for (m,l) in list(zip(means,lens))[i:j]])
-            l=sum(lens[i:j])
-            return s/l
-        
-        def sum_var(i,j,m):
-            """
-            Counts the variance in several consecutive diagonals given their mean
-            """
-            mses=[np.mean((self.hicmap.diagonal(i)-m)**2) for i in range(i,j)]
-            s=sum([m*l for (m,l) in zip(mses,lens[i:j])])
-            l=sum(lens[i:j])
-            return s/l
-            
-
-        pvalue_matrix = np.ones(domain_matrix.shape)
-        
-        for i in range(domain_matrix.shape[0]):
-            li=self.domains[i][1]-self.domains[i][0]+1
-            for j in range(i+1,domain_matrix.shape[1]):
-                lj=self.domains[j][1]-self.domains[j][0]+1
-                dist=self.domains[j][0]-self.domains[i][1]
-                span=self.domains[j][1]-self.domains[i][0]+1
-                expected = sum_mean(dist,span)
-                var=sum_var(dist,span,expected)
-                mean=expected*li*lj
-                if var< mean:
-                    var=mean+1
-                k = domain_matrix[i][j]
-                r=mean**2/(var-mean)
-                p=(var-mean)/var
-                model=ss.nbinom(n=r,p=1-p)
-                if expected and k:
-                    pval = model.sf(k)
-                    pvalue_matrix[i, j] = pval
-                    if pval < self.threshold:
-                        sigs.append((i, j, pval))
-
-        logger.info('FDR correcting the pvalues')
-
-        corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(domain_matrix.shape)
-
-        corr_sigs = []
-        for i in range(domain_matrix.shape[0]):
-            for j in range(domain_matrix.shape[1]):
-                pval = corrected[i,j]
-                if pval < self.threshold:
-                    corr_sigs.append((i, j, pval))
-
-        return sigs,corr_sigs

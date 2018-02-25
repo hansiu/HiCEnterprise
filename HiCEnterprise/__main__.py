@@ -21,7 +21,7 @@ def exec_domains(args):
     """
     from .domains.extract import Extractor
     e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold,
-                  args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color)
+                  args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color, args.distribution)
     e.run(args.stats_folder, args.plotting, args.figures_folder)
 
 
@@ -108,6 +108,10 @@ parser_domains.add_argument('-r', '--interactions_color', type=str,
                                  "https://matplotlib.org/api/pyplot_summary.html described as a Colormap option. "
                                  "Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'YlOrBr'",
                             default='YlOrBr')
+parser_domains.add_argument('--distribution', type=str,
+                            help="The distribution on which you would like to base the identification of domain-domain "
+                                 "interactions. Available: hypergeom, negbinom, poisson. Default: hypergeom",
+                            default='hypergeom')
 
 
 def main():
