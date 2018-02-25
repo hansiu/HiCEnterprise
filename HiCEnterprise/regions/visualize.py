@@ -3,6 +3,9 @@ Script for plotting interaction profiles for given regions from analysis.
 """
 
 import argparse
+import re
+from glob import glob
+
 import numpy as np
 
 try:
@@ -19,7 +22,7 @@ from ..utils import create_folders
 from .extract import Bin
 
 logger = logging.getLogger('regions.visualize')
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)  # TODO change
 
 
 class Plotter:
@@ -40,7 +43,7 @@ class Plotter:
         Plots interaction profiles for chosen regions to pdf file either with rpy2 or matplotlib.
         """
 
-        filename = figures_folder + '/' + self.regions_name +'-'+ self.chr
+        filename = figures_folder + '/' + self.regions_name + '-' + self.chr + '-' + str(self.num_bins)
         if section:
             filename += '-' + str(section[0]) + '-' + str(section[1])
         if self.num_regs:
@@ -71,15 +74,22 @@ class Plotter:
         t = [x for x in range(-self.num_bins, self.num_bins + 1)]
         for region in regions[:self.num_regs]:
             if not np.any(region.weighted):
-                logger.warn(
+                logger.warning(
                     "Warning: No data for region located on bin " + str(region.bin) + ". Not plotting this one.")
                 continue
+            middle = (len(region.weighted[0]) - 1) / 2
+            if middle < self.num_bins:
+                logger.error("Warning: There are less bins calculated for regions than you want to plot.")
+                sys.exit(1)
             d = {'map': robjects.StrVector(
                 [str(m) for sublist in [[x] * len(t) for x in range(len(region.weighted))] for m in sublist]),
                 't': robjects.FloatVector(t * len(region.weighted)),
-                'e': robjects.FloatVector([i for sublist in region.weighted for i in sublist]),
-                'p': robjects.FloatVector([-np.log10(x) for sublist in region.pvalues for x in sublist]),
-                'c': robjects.FloatVector([-np.log10(x) for sublist in region.corrected_pvalues for x in sublist])}
+                'e': robjects.FloatVector([i for sublist in region.weighted for i in
+                                           sublist[middle - self.num_bins:middle + self.num_bins + 1]]),
+                'p': robjects.FloatVector([-np.log10(x) for sublist in region.pvalues for x in
+                                           sublist[middle - self.num_bins:middle + self.num_bins + 1]]),
+                'c': robjects.FloatVector([-np.log10(x) for sublist in region.corrected_pvalues for x in
+                                           sublist[middle - self.num_bins:middle + self.num_bins + 1]])}
             dataf = robjects.DataFrame(d)
             gp = ggplot2.ggplot(dataf)  # first yellow second red
             p1 = gp + ggplot2.geom_line(mapping=ggplot2.aes_string(x='t', y='e', group='map', colour='map'),
@@ -124,9 +134,13 @@ class Plotter:
 
         for region in regions[:self.num_regs]:
             if not np.any(region.weighted):
-                logger.warn(
+                logger.warning(
                     "Warning: No data for region located on bin " + str(region.bin) + ". Not plotting this one.")
                 continue
+            middle = (len(region.weighted[0]) - 1) / 2
+            if middle < self.num_bins:
+                logger.error("Warning: There are less bins calculated for regions than you want to plot.")
+                sys.exit(1)
             fig = plt.figure()
             ax = fig.add_subplot(311)
             ax.set_yscale("log")
@@ -143,9 +157,14 @@ class Plotter:
                 a.tick_params(axis='both', which='major', labelsize=7)
                 a.spines['top'].set_visible(False)
             for i in range(n):
-                ax.plot(t, region.weighted[i], c=colors[i], alpha=0.8, linewidth=0.8)
-                ax2.plot(t, [-np.log10(x) for x in region.pvalues[i]], c=colors[i], alpha=0.8, linewidth=0.8)
-                ax3.plot(t, [-np.log10(x) for x in region.corrected_pvalues[i]], c=colors[i], alpha=0.8, linewidth=0.8)
+                ax.plot(t, region.weighted[i][middle - self.num_bins:middle + self.num_bins + 1], c=colors[i],
+                        alpha=0.8, linewidth=0.8)
+                ax2.plot(t,
+                         [-np.log10(x) for x in region.pvalues[i][middle - self.num_bins:middle + self.num_bins + 1]],
+                         c=colors[i], alpha=0.8, linewidth=0.8)
+                ax3.plot(t, [-np.log10(x) for x in
+                             region.corrected_pvalues[i][middle - self.num_bins:middle + self.num_bins + 1]],
+                         c=colors[i], alpha=0.8, linewidth=0.8)
             ax3.axhline(y=-np.log10(self.threshold), color='black', linestyle='dashed', alpha=0.8, linewidth=0.7)
             fig.tight_layout()
             title.set_y(1.05)
@@ -162,9 +181,18 @@ class Plotter:
         pickled_folder, figures_folder = create_folders([pickled_folder, figures_folder])
         pck_filename_base = pickled_folder + '/' + self.chr + '-' + str(self.num_bins) + 'x' + str(
             self.bin_res) + 'bp-'
-        if os.path.exists(pck_filename_base + 'regs-' + self.regions_name):
+        reg_files = glob(
+            "-[0-9]*x".join(
+                pck_filename_base.split('-' + str(self.num_bins) + 'x')) + 'regs-' + self.regions_name)
+        logger.debug('Reg files found: ' + str(reg_files))
+        best = 0
+        if reg_files:
+            p = re.compile(r'-(?P<n_b>[0-9]*)x')
+            best = max([int(p.search(x).group('n_b')) for x in reg_files])
             logger.info('Loading region data from pickled file')
-            with open(pck_filename_base + 'regs-' + self.regions_name, 'rb') as fp:
+            with open(("-" + str(best) + "x").join(
+                    pck_filename_base.split('-' + str(self.num_bins) + 'x')) + 'regs-' + self.regions_name,
+                      'rb') as fp:
                 regs = pickle.load(fp)
         else:
             logger.critical('No pickled region file '+pck_filename_base + 'regs' + self.regions_name+' in ' + pickled_folder)
@@ -194,7 +222,7 @@ parser.add_argument('-r', '--regions_name',
 parser.add_argument('-c', '--chr', help='Chromosome for which to extract bins', type=str,
                     default='1')  # it has to be str, because of 'X'
 parser.add_argument('-b', '--bin_res', help='Resolution (size of the bins on the hicmaps) in bp', type=int)
-parser.add_argument('-n', '--num_bins', help='Number of bins left and right to be considered', type=int, default=100)
+parser.add_argument('-n', '--num_bins', help='Number of bins left and right to be plotted', type=int, default=100)
 parser.add_argument('--num_regs', help='Number of regions to consider and plot', type=int)
 parser.add_argument('-t', '--threshold', help='FDR threshold', type=float,
                     default=0.01)
