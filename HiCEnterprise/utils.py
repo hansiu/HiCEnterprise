@@ -1,4 +1,3 @@
-# coding=utf-8
 """
 Utilities for both domains and regions.
 """
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 def clip_and_blur(arr, stddevs=5, blur=1):
     """
-    Clips and blurs the matrix as needed. By Krzysiek Królak.
+    Clips and blurs the matrix as needed. By Krzysiek Krolak.
     """
     arr = np.ma.masked_invalid(arr)
     mean = np.mean(arr)
