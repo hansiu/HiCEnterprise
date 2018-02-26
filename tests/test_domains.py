@@ -21,15 +21,16 @@ class TestExtractor:
         chrom = '1'
         bin_res = 150000
         sherpa_lvl = 1
-        hic_folder = TEST_DIR + '/test_files/maps/'
+        hic_map = TEST_DIR + '/test_files/maps/mtx-1-1.npy'
         threshold = 0.01
         plot_title = "Plot"
         ticks_separation = 0
         hic_color = 'Reds'
         interactions_color = "Blues"
+        hic_name = 'test_maps'
 
-        e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separation,
-                      hic_color, interactions_color, distribution)
+        e = Extractor(domain_file, chrom, bin_res, sherpa_lvl, hic_map, threshold, plot_title, ticks_separation,
+                      hic_color, interactions_color, distribution, hic_name)
         return e
 
     def test_init(self):
@@ -41,8 +42,7 @@ class TestExtractor:
         assert isinstance(e.domains, list)
         assert e.domains[0] == [0, 0]
         assert isinstance(e.hicmap, np.ndarray)
-        assert e.hic_folder == TEST_DIR + '/test_files/maps'
-        assert e.hic_name == 'maps'
+        assert e.hic_path == TEST_DIR + '/test_files/maps/mtx-1-1.npy'
         assert e.threshold == 0.01
         assert e.plot_title == "Plot"
         assert e.ticks_separ == 0
@@ -50,6 +50,7 @@ class TestExtractor:
         assert e.inter_color == "Blues"
         assert e.hicmap.shape == (100, 100)
         assert e.distribution == 'hypergeom'
+        assert e.hic_name == 'test_maps'
 
     def test_check_overlap_bad(self):
         e = self.create()
@@ -97,5 +98,5 @@ class TestExtractor:
     def test_plotting(self):
         e = self.create()
         e.run(self.tmpdir + '/stats/', True, self.tmpdir + '/figures/')
-        assert os.path.exists(self.tmpdir + '/stats/sherpa-tads-maps-stats1-0_01-hypergeom.txt')
-        assert os.path.exists(self.tmpdir + '/figures/maps-sherpa-tads-hypergeom.png')
+        assert os.path.exists(self.tmpdir + '/stats/sherpa-tads-test_maps-stats1-0_01-hypergeom.txt')
+        assert os.path.exists(self.tmpdir + '/figures/test_maps-sherpa-tads-hypergeom.png')

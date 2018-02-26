@@ -23,17 +23,19 @@ class Extractor:
     Performs all extracting of significant contact frequencies from provided maps, domains and arguments.
     """
 
-    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_folder, threshold, plot_title, ticks_separ,
-                 hic_color, inter_color, distribution):
+    def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_map, threshold, plot_title, ticks_separ,
+                 hic_color, inter_color, distribution, hic_name):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
         self.sherpa_level = sherpa_lvl or None
         self.domains = self._load_domains(domain_file)
         self._check_overlap()
-        self.hic_folder = os.path.abspath(hic_folder)
-        self.hicmap = self._symm(load_hicmap(self.hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
-        self.hic_name = os.path.basename(self.hic_folder)
+        hic_folder = os.path.dirname(os.path.abspath(hic_map))
+        filename = os.path.basename(os.path.abspath(hic_map))
+        self.hicmap = self._symm(load_hicmap(hic_folder, filename))
+        self.hic_name = hic_name or os.path.basename(hic_map).split('.')[0]
+        self.hic_path = hic_map
         self.threshold = threshold
         self.plot_title = plot_title
         self.ticks_separ = ticks_separ
@@ -265,6 +267,7 @@ class Extractor:
         if plotting is not False:
             logger.debug('Getting to plotter')
             from .visualize import Plotter
-            p = Plotter(self.hic_folder, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title,
-                        self.ticks_separ, self.hic_color, self.inter_color, self.bin_res, self.distribution)
+            p = Plotter(self.hic_path, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title,
+                        self.ticks_separ, self.hic_color, self.inter_color, self.bin_res, self.distribution,
+                        self.hic_name)
             p.run(figures_folder)

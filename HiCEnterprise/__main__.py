@@ -20,8 +20,9 @@ def exec_domains(args):
     execute domains analysis
     """
     from .domains.extract import Extractor
-    e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_folder, args.threshold,
-                  args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color, args.distribution)
+    e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_map, args.threshold,
+                  args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color, args.distribution,
+                  args.hic_name)
     e.run(args.stats_folder, args.plotting, args.figures_folder)
 
 
@@ -83,13 +84,14 @@ parser_domains = subparsers.add_parser('domains', help='Extracts domains (TADs) 
                                                        ' domain positions', parents=[parent_parser])
 parser_domains.set_defaults(func=exec_domains)
 
-parser_domains.add_argument('-m', '--hic_folder',
-                            help='Folder in which the HiC data is stored with file names in format '
-                                 'mtx-N-N.npy, where N = chromosome', type=str, required=True)
+parser_domains.add_argument('-m', '--hic_map',
+                            help='Hi-C map in numpy format', type=str, required=True)
 parser_domains.add_argument('-d', '--domain_file',
                             help="Txt file with domain definition in the format: dom_id(integer) "
                                  "chromosome(integer) dom_start(bp) dom_end(bp) sherpa-lvl(OPTIONAL)", type=str,
                             required=True)
+parser_domains.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default is the name of the file.",
+                            type=str)
 parser_domains.add_argument('--plotting', help="Plot results. You'll need matplotlib library",
                             action="store_true")
 parser_domains.add_argument('--sherpa_lvl', help="If there are sherpa levels in the file and which one to use",

@@ -19,13 +19,15 @@ class Plotter:
     Plots domain interaction maps with matplotlib.
     """
 
-    def __init__(self, hic_folder, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color,
-                 inter_color, bin_res, distribution):
-        hic_folder = os.path.abspath(hic_folder)
+    def __init__(self, hic_map, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color,
+                 inter_color, bin_res, distribution, hic_name):
+        hic_map = os.path.abspath(hic_map)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
-        self.hicmap = clip_and_blur(load_hicmap(hic_folder, 'mtx-' + self.chr + '-' + self.chr + '.npy'))
-        self.hic_name = os.path.basename(hic_folder)
+        hic_folder = os.path.dirname(os.path.abspath(hic_map))
+        filename = os.path.basename(os.path.abspath(hic_map))
+        self.hicmap = clip_and_blur(load_hicmap(hic_folder, filename))
+        self.hic_name = hic_name or os.path.basename(hic_map).split('.')[0]
         self.threshold = threshold
         self.plot_title = plot_title
         self.ticks_separ = ticks_separ
@@ -102,8 +104,8 @@ class Plotter:
 # Argument Parsing
 parser = argparse.ArgumentParser(description='Script for visualizing hicMaps with significant domain interactions from '
                                              'extract.py script')
-parser.add_argument('--hic_folder', type=str, help='Folder in which the HiC data is stored with file names in format '
-                                                   'mtx-N-N.npy, where N = chromosome', required=True)
+parser.add_argument('-m', '--hic_map',
+                    help='Hi-C map in numpy format', type=str, required=True)
 parser.add_argument('-i', '--interactions', type=str,
                     help="Name of the interactions provided while extracting", required=True)
 parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=True)
@@ -131,12 +133,15 @@ parser.add_argument('--distribution', type=str,
                     help="The distribution on which identification of domain-domain interactions was based."
                          " Available: hypergeom, negbinom, poisson. Default: hypergeom",
                     default='hypergeom')
+parser.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default is the name of the file.",
+                    type=str)
 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
     p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title,
-                args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res, args.distribution)
+                args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res, args.distribution,
+                args.hic_name)
     p.run(args.figures_folder)
 
 # TODO add TAD plotting
