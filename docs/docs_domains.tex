@@ -1,19 +1,40 @@
-\chapter{HiCEnterprise tads}
+\chapter{HiCEnterprise domains}
 \label{domains}
 
 In the domain part of the package the significance of interaction between domains A and B is calculated as the
-probability of observing a stronger contact under the fitted Hypergeometric distribution, where N (population size) is
-the sum of all frequencies in the Hi-C map, a is the sum from the column of domain A and b is the sum from the row of
-domain B (number of success states in the population and number of draws). This idea and original code was developed
-by Irina Tuszynska and presented in (Niskanen et al. n.d.).
+probability of observing a stronger contact under the fitted distribution. There are three distributions available:
+Hypergeometric (default), Negative Binomial and Poisson.
+
+\section{Available distributions}
+
+\subsection{Hypergeometric}
+
+\begin{equation}
+Pvalue = 1 - \sum_{i=0}^{k-1} \frac{{a\choose i}{N-a\choose b-i }}{{N\choose b}}
+\end{equation}
+
+Hypergeometric distribution is used as default by the program.
+Here $N$ (population size) is the sum of all frequencies in the Hi-C map, $a$ is the sum from the column of domain A and
+$b$ is the sum from the row of domain B (number of success states in the population and number of draws). $k$ is the number of contacts between domains A and B. This idea
+and original code was developed by Irina Tuszyńska and presented in (Niskanen et al. n.d.).
+
+\subsection{Negative Binomial}
+% TODO ask Bartek if he could write something here
+This part of code in the program was written by Bartek Wilczyński.
+
+\subsection{Poisson}
+% TODO ask Bartek if he could write something here
+This part of code in the program was written by Bartek Wilczyński.
+
 
 \section{Input files}
 \label{sec:input2}
 
-To run the point interactions analysis you need:
+To run the domain-domain interactions analysis you need:
 \begin{itemize}
-    \item one Hi-C map in numpy format for an N chromosome (named mtx-N-N.npy)
-    \item file with domains definition in the format: domain id, chromosome name, start coordinate, end coordinate. Optionally fifth column may contain \lstinline{sherpa} level.
+    \item one Hi-C map in numpy format for one chromosome
+    \item file with domains definition in the format: domain\_id chromosome\_name start\_coordinate end\_coordinate (space
+    delimited). Optionally fifth column may contain \lstinline{sherpa}\_level.
 \end{itemize}
 
 All coordinates should be provided in bp.
@@ -28,7 +49,7 @@ HiCEnterprise domains domains_options
 \end{lstlisting}
 
 
-To see the available options:
+To see the available arguments:
 \begin{lstlisting}
 HiCEnterprise domains -h
 \end{lstlisting}
@@ -37,7 +58,7 @@ HiCEnterprise domains -h
 \subsubsection{Example runs}
 There are a few required arguments for the analysis.
 \begin{itemize}
-    \item Path to folder with Hi-C map in a numpy format: \lstinline{--hic_folder ./map40kb}
+    \item Path to the Hi-C map in a numpy format: \lstinline{--hic_map ./map40kb.npy}
     \item File with domain definition: \lstinline{--domain_file domains.txt}
     \item Name of the chromosome to run the analysis for: \lstinline{--chr 22}
     \item Resolution (bin size) of Hi-C maps in bp (all maps provided should be of the same resolution): \lstinline{--bin_res 40000}
@@ -46,57 +67,63 @@ There are a few required arguments for the analysis.
 For information on formats of files see~\ref{sec:input2}.
 
 Run with only required arguments:
-
 \begin{lstlisting}
-HiCEnterprise domains --hic_folder ./map40kb --domain_file
+HiCEnterprise domains --hic_map ./map40kb.npy --domain_file
 ./domains.txt --chr 22 --bin_res 40000
 \end{lstlisting}
 
 
 \subsubsection{Visualisation} % TODO !!!!
 
-If you want to plot the results with matplotlib, add --plotting argument to the command. Resulting figures can be found in directory
-provided by --figures\_folder option.
+If you want to plot the results with matplotlib, add --plotting argument to the command. Resulting figures can be found
+in director provided by --figures\_folder option.
 
 In example:
 \begin{lstlisting}
-HiCEnterprise domains --hic_folder ./map40kb --domain_file
+HiCEnterprise domains --hic_map ./map40kb.npy --domain_file
 ./domains.txt --chr 22 --bin_res 40000 --plotting
 --figures_folder ./my_folder_for_figures
 \end{lstlisting}
 
 
 If you don not provide the --figures\_folder argument, ./figures directory will be created and the plots will be put
-there.
+there. There are additional options that you can use to change your visualization, i.e. if you want to change colors that
+represent the Hi-C map and domain-domain interactions, you can use --hic\_color and --interactions\_color with any
+available palette from https://matplotlib.org/api/pyplot\_summary.html.
 
 \section{Output files}
 
 \subsection{stats folder}
-This folder contains the results from the analysis. Result filenames consist of domains file name, map folder names,
-'stats', chromosome name and statistical cutoff. % TODO what about resolution
-threshold. Example: domains-map40kb-stats22-0\_01.txt.
+This folder contains the results from the analysis. Result filenames consist of domains file name, map name,
+'stats' or 'corr\_stats', chromosome name, statistical cutoff threshold, and distribution name. Example:
+domains-map40kb-stats22-0\_01-hypergeom.txt.
 
 \subsection{figures folder}
 In this folder you will find the plotted figures if the --plotting argument was used. Interaction maps are
-extracted to PNG files. Files are named by the regions file name, maps name and other arguments.
+extracted to PNG files. Files are named by the map name, "corr" if the FDR corrected data is on the plot, domains file
+name, and distribution name. Example: map40kb-corr\_domains-hypergeom.png
 
 \section{All arguments listed alphabetically}
 \label{sec:arguments2}
 \begin{itemize}
     \item -b, --bin\_res : REQUIRED Resolution (size of the bins on the Hi-C maps) in bp i.e.~10000 for 10kb resolution.
-All maps should be of same resolution.
-\item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
+    \item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
+    \item --distribution : The distribution on which you would like to base the identification of domain-domain
+    interactions. Available: hypergeom, negbinom, poisson. Default is hypergeom.
     \item -d, --domain\_file : REQUIRED Text file with domain definition in the format: \\
     dom\_id(int) chromosome(int) dom\_start(bp) dom\_end(bp) sherpa-lvl(optional).
-    \item -f, --figures\_folder : Folder to save the figures (plots) in. Default is '../figures/'.
-    \item -m, --hic\_folder : REQUIRED Folder in which the Hi-C data is stored with file names in format mtx-N-N.npy, where
-N = chromosome name.
-\item --plotting : If results should be plotted. matplotlib library is required.
-    \item -s, --stats\_folder : Folder to save the statistics and significant points in. Default is '../stats/'.
+    \item -e, --ticks\_separation : Frequency of ticks on the plot.
+    \item -f, --figures\_folder : Folder to save the figures (plots) in. Default is './figures/'.
+    \item -l, --plot\_title : The title of the plot. If it contains spaces, use quotation marks. Default is
+    "Interactions".
+    \item -m, --hic\_map : Path to the single-chromosome Hi-C map in numpy format.
+    \item -n, --hic\_name : Name to use for Hi-C map. Default is the name of the file.
+    \item -o, --hic\_color : The color of HiC map. You can choose the palette from Colormaps available here:
+    https://matplotlib.org/api/pyplot\_summary.html. Recommended are Reds, Blues, YlOrBr, PuBu. Default is Greens.
+    \item --plotting : If results should be plotted. matplotlib library is required.
+    \item -r, --interactions\_color : The color of interactions. You can choose the palette from Colormaps available
+    here: https://matplotlib.org/api/pyplot\_summary.html. Recommended are Reds, Blues, YlOrBr, PuBu. Default is YlOrBr.
+    \item -s, --stats\_folder : Folder to save the statistics and significant points in. Default is './stats/'.
     \item --sherpa\_lvl : If there are sherpa levels in the file and which one to use.
-\item -t, --threshold :  Statistical cutoff threshold. Default is 0.01.
+    \item -t, --threshold :  Statistical cutoff threshold. Default is 0.01.
 \end{itemize}
-
-
-
-

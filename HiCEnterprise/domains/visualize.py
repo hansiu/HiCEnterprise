@@ -110,8 +110,8 @@ parser.add_argument('-i', '--interactions', type=str,
                     help="Name of the interactions provided while extracting", required=True)
 parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=True)
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
-                    default='../stats/')
-parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='../figures/')
+                    default='./stats/')
+parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='./figures/')
 parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
 parser.add_argument('-l', '--plot_title', type=str,
                     help="The title of the plot. If it contains spaces, use quotation marks.",
@@ -122,7 +122,7 @@ parser.add_argument('-o', '--hic_color', type=str, help="The color of HiC map, u
                                                         "Colormap option.  Recommended: Reds, Blues,YlOrBr, PuBu. "
                                                         "Default is 'Greens'",
                     default='Greens')
-parser.add_argument('-r', '--interactions_color', type=str, help="The color of HiC map, use your favorite from "
+parser.add_argument('-r', '--interactions_color', type=str, help="The color of interactions, use your favorite from "
                                                                  "https://matplotlib.org/api/pyplot_summary.html "
                                                                  "described as a Colormap option. Recommended: Reds, "
                                                                  "Blues, YlOrBr, PuBu. Default is 'YlOrBr'",

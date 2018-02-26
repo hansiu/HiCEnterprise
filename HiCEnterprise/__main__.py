@@ -42,9 +42,9 @@ parent_parser.add_argument('-t', '--threshold', help='Statistical cutoff thresho
                            default=0.01)
 parent_parser.add_argument('-s', '--stats_folder', help="Folder to save the statistics & significant points in",
                            type=str,
-                           default='../stats/')
+                           default='./stats/')
 parent_parser.add_argument('-f', '--figures_folder', help="Folder to save the figures (plots) in", type=str,
-                           default='../figures/')
+                           default='./figures/')
 
 # Regions analysis subparser
 parser_regions = subparsers.add_parser('regions',
@@ -62,7 +62,7 @@ parser_regions.add_argument('-n', '--num_bins', help='Number of bins left and ri
 parser_regions.add_argument('--num_regs', help='Number of regions to consider and plot', type=int)
 parser_regions.add_argument('-a', '--section', help="Section of bp for the plot", type=str)
 parser_regions.add_argument('-p', '--pickled_folder', help="Folder with pickled files (to load from/save in)", type=str,
-                            default='../pickles/')
+                            default='./pickles/')
 parser_regions.add_argument('--plotting',
                             help="If there should be plotting, and if so should it be with rpy2 or matplotlib."
                                  " Options: mpl, rpy2.", type=str)
@@ -90,7 +90,7 @@ parser_domains.add_argument('-d', '--domain_file',
                             help="Txt file with domain definition in the format: dom_id(integer) "
                                  "chromosome(integer) dom_start(bp) dom_end(bp) sherpa-lvl(OPTIONAL)", type=str,
                             required=True)
-parser_domains.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default is the name of the file.",
+parser_domains.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. Default is the name of the file.",
                             type=str)
 parser_domains.add_argument('--plotting', help="Plot results. You'll need matplotlib library",
                             action="store_true")
@@ -106,7 +106,7 @@ parser_domains.add_argument('-o', '--hic_color', type=str,
                                  "Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'Greens'",
                             default='Greens')
 parser_domains.add_argument('-r', '--interactions_color', type=str,
-                            help="The color of HiC map, use your favorite from "
+                            help="The color of interactions, use your favorite from "
                                  "https://matplotlib.org/api/pyplot_summary.html described as a Colormap option. "
                                  "Recommended: Reds, Blues, YlOrBr, PuBu. Default is 'YlOrBr'",
                             default='YlOrBr')
