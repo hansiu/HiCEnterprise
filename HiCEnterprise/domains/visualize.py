@@ -139,7 +139,7 @@ parser.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default 
 # Main
 if __name__ == "__main__":
     args = parser.parse_args()
-    p = Plotter(args.hic_folder, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title,
+    p = Plotter(args.hic_map, args.stats_folder, args.interactions, args.chr, args.threshold, args.plot_title,
                 args.ticks_separation, args.hic_color, args.interactions_color, args.bin_res, args.distribution,
                 args.hic_name)
     p.run(args.figures_folder)
