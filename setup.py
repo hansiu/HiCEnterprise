@@ -31,7 +31,7 @@ if __name__ == '__main__':
             "statsmodels",
             "matplotlib"
         ],
-        setup_requires=['pytest-runner'],
+        setup_requires=['pytest-runner<=3.0.1'],
         tests_require=['pytest'],
 
     )

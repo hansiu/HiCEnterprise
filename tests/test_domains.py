@@ -68,7 +68,6 @@ class TestExtractor:
         assert domain_matrix.shape == (len(e.domains), len(e.domains))
 
     def test_calc_hypergeom(self):
-        # TODO failing now - fix when the decision is made about the sum of contacts and symm
         e = self.create()
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
         assert len(sigs) == 100
@@ -77,7 +76,6 @@ class TestExtractor:
         assert corr_sigs[1] == (5, 7, pytest.approx(0))
 
     def test_calc_negbinom(self):
-        # TODO failing now - fix when the decision is made about the sum of contacts and symm
         e = self.create('negbinom')
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
         assert len(sigs) == 70
@@ -86,7 +84,6 @@ class TestExtractor:
         assert corr_sigs[1] == (5, 31, pytest.approx(0.0066, abs=1e-3))
 
     def test_calc_poisson(self):
-        # TODO failing now - fix when the decision is made about the sum of contacts and symm
         e = self.create('poisson')
         sigs, corr_sigs = e.calc(e.create_domain_matrix())
         assert len(sigs) == 106
