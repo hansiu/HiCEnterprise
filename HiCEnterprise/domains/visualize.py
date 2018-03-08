@@ -112,7 +112,7 @@ parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
                     default='./stats/')
 parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='./figures/')
-parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis")
+parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis", default=0.01)
 parser.add_argument('-l', '--plot_title', type=str,
                     help="The title of the plot. If it contains spaces, use quotation marks.",
                     default='Interactions')
@@ -132,7 +132,7 @@ parser.add_argument('-b', '--bin_res', help='Resolution (size of the bins on the
 parser.add_argument('--distribution', type=str,
                     help="The distribution on which identification of domain-domain interactions was based."
                          " Available: hypergeom, negbinom, poisson. Default: hypergeom",
-                    default='hypergeom')
+                    default='poisson')
 parser.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default is the name of the file.",
                     type=str)
 
