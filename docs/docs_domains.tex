@@ -18,14 +18,11 @@ Here $N$ (population size) is the sum of all frequencies in the Hi-C map, $a$ is
 $b$ is the sum from the row of domain B (number of success states in the population and number of draws). $k$ is the number of contacts between domains A and B. This idea
 and original code was developed by Irina Tuszyńska and presented in (Niskanen et al. n.d.).
 
-\subsection{Negative Binomial}
-% TODO ask Bartek if he could write something here
-This part of code in the program was written by Bartek Wilczyński.
-
 \subsection{Poisson}
-% TODO ask Bartek if he could write something here
-This part of code in the program was written by Bartek Wilczyński.
+Another approach is to assume that the contacts are distributed according to the Poisson distribution with the $\lambda$ parameter depending on the distance from the diagonal. In this case, for every domain pair, we estimate the average contact frequency $\lambda_d$ in the diagonals corresponding to the distance between them and score the given domain contact against the Poisson distribution with the mean and variance $\lambda_d$.
 
+\subsection{Negative Binomial}
+The negative binomial distribution is slightly more general than the Poisson distribution discussed in the previous section. In particular it allows for overdispersion of the data. In this case, for each pair of domains at the distance $d$ we estimate the mean contact frequency $\mu_d$ and variance $\sigma^2_d \geq \mu$ from all values in the respective diagonals and then score the contact significance of this domain pair against the negative binomial distribution with the estimated mean and variance. 
 
 \section{Input files}
 \label{sec:input2}

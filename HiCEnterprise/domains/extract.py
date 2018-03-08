@@ -120,6 +120,7 @@ class Extractor:
     def _calc_hypergeom(self, domain_matrix):
         sigs = []
         n = np.sum(np.triu(domain_matrix))
+        #n =  np.sum(domain_matrix)
         pvalue_matrix = np.zeros(domain_matrix.shape)
         for i in range(domain_matrix.shape[0]):
             a = sum(domain_matrix[i][:])

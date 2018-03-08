@@ -112,8 +112,8 @@ parser_domains.add_argument('-r', '--interactions_color', type=str,
                             default='YlOrBr')
 parser_domains.add_argument('--distribution', type=str,
                             help="The distribution on which you would like to base the identification of domain-domain "
-                                 "interactions. Available: hypergeom, negbinom, poisson. Default: hypergeom",
-                            default='hypergeom')
+                                 "interactions. Available: hypergeom, negbinom, poisson. Default: poisson",
+                            default='poisson')
 
 
 def main():
