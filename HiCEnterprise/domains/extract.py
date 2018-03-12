@@ -151,7 +151,10 @@ class Extractor:
             """
             s = sum([m * l for (m, l) in list(zip(means, lens))[i:j]])
             l = sum(lens[i:j])
-            return s / l
+            try:
+                return s / l
+            except ZeroDivisionError:
+                return 0
 
         def sum_var(i, j, m):
             """
@@ -160,7 +163,10 @@ class Extractor:
             mses = [np.mean((self.hicmap.diagonal(i) - m) ** 2) for i in range(i, j)]
             s = sum([m * l for (m, l) in zip(mses, lens[i:j])])
             l = sum(lens[i:j])
-            return s / l
+            try:
+                return s / l
+            except:
+                return 0
 
         pvalue_matrix = np.ones(domain_matrix.shape)
 
@@ -198,7 +204,10 @@ class Extractor:
             """
             s = sum([m * l for (m, l) in list(zip(means, lens))[i:j]])
             l = sum(lens[i:j])
-            return s / l
+            try:
+                return s / l
+            except:
+                return 0
 
         pvalue_matrix = np.ones(domain_matrix.shape)
 
