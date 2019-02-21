@@ -88,6 +88,14 @@ class Plotter:
         output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[
             0] + '-' + self.distribution + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
+        np.save("pure.npy", self.hicmap)
+        np.save("inter.npy", interaction_matrix)
+        mat_sum = self.hicmap.sum(axis=0)
+        int_sum = interaction_matrix.sum(axis = 0)
+        plt.close()
+        plt.plot(mat_sum)
+        plt.plot(int_sum)
+        plt.savefig("moje.png", dpi=1500, bbox_inches='tight')
         plt.close()
 
     def run(self, figures_folder):

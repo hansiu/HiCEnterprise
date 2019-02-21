@@ -90,10 +90,17 @@ class Extractor:
         """
         logger.info('Creating the domain matrix')
         domain_matrix = np.zeros((len(self.domains), len(self.domains)))
+        dom_size = np.zeros(len(self.domains)) #moja
         for i1, d1 in enumerate(self.domains):
             for i2, d2 in enumerate(self.domains):
                 domain_matrix[i1, i2] = self.hicmap[d1[0]:d1[1] + 1, d2[0]:d2[1] + 1].sum()
-
+            dom_size[i1] =  d1[1]+1-d1[0] #moja   
+        dom_sum = domain_matrix.sum(axis =0) # in order to eleminate near to centromere domains with small amount of contacts we calculate the number of contacts in a row inside each domain, and if it is less than 2/3 of len_domains, all values for this domain = 0.0
+        points_in_one_row_domains = np.divide(dom_sum, dom_size)
+        suspicious_dom = np.nonzero(points_in_one_row_domains < len(self.domains))
+        if suspicious_dom[0].shape != (0,):
+            for d in suspicious_dom[0]:
+                domain_matrix[d] = domain_matrix[:,d] = 0.0
         return domain_matrix
 
     def calc(self, domain_matrix):
