@@ -22,7 +22,7 @@ def exec_domains(args):
     from .domains.extract import Extractor
     e = Extractor(args.domain_file, args.chr, args.bin_res, args.sherpa_lvl, args.hic_map, args.threshold,
                   args.plot_title, args.ticks_separation, args.hic_color, args.interactions_color, args.distribution,
-                  args.hic_name)
+                  args.hic_name, args.all_domains, args.interact_indomain)
     e.run(args.stats_folder, args.plotting, args.figures_folder)
 
 
@@ -114,6 +114,10 @@ parser_domains.add_argument('--distribution', type=str,
                             help="The distribution on which you would like to base the identification of domain-domain "
                                  "interactions. Available: hypergeom, negbinom, poisson. Default: poisson",
                             default='poisson')
+parser_domains.add_argument('--all_domains', help="Stop remove pericentromeric domains and domains with rare interdomains contacts, where a mean number of contacts in one row is less than n*numer_of_domains. n = 1 and can be changed by --interact_indomain parameter",
+                            action="store_true")
+parser_domains.add_argument('-g','--interact_indomain', type =float, help="Multiplier of domains_number, that is a threeshold for neglecting pericentromeric domains. Mutualy exclusive with --all_domains option. Default = 1, higher number - more domains will be removed",
+                            default = 1)
 
 
 def main():

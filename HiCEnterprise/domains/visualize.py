@@ -143,6 +143,10 @@ parser.add_argument('--distribution', type=str,
                     default='poisson')
 parser.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default is the name of the file.",
                     type=str)
+parser.add_argument('--all_domains', help="Stop remove pericentromeric domains and domains with rare interdomains contacts, where a mean number of contacts in one row is less than n*numer_of_domains. n = 1 and can be changed by --interact_indomain parameter",
+                            action="store_true")
+parser.add_argument('-g','--interact_indomain', type =float, help="Multiplier of domains_number, that is a threeshold for neglecting pericentromeric domains. Mutualy exclusive with --all_domains option. Default = 1, higher number - more domains will be removed",
+                            default = 1)
 
 # Main
 if __name__ == "__main__":

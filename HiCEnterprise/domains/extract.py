@@ -24,7 +24,7 @@ class Extractor:
     """
 
     def __init__(self, domain_file, chrom, bin_res, sherpa_lvl, hic_map, threshold, plot_title, ticks_separ,
-                 hic_color, inter_color, distribution, hic_name):
+                 hic_color, inter_color, distribution, hic_name, all_dom, inter_indom):
         self.domains_name = str(os.path.basename(domain_file).split('.')[0])
         self.chr = chrom
         self.bin_res = bin_res
@@ -95,7 +95,7 @@ class Extractor:
             for i2, d2 in enumerate(self.domains):
                 domain_matrix[i1, i2] = self.hicmap[d1[0]:d1[1] + 1, d2[0]:d2[1] + 1].sum()
             dom_size[i1] =  d1[1]+1-d1[0] #moja   
-        dom_sum = domain_matrix.sum(axis =0) # in order to eleminate near to centromere domains with small amount of contacts we calculate the number of contacts in a row inside each domain, and if it is less than 2/3 of len_domains, all values for this domain = 0.0
+        dom_sum = domain_matrix.sum(axis =0) # in order to eliminate near to centromere domains with small amount of contacts we calculate the mean number of contacts in one row inside each domain, and if it is less than  n*len_domains (default n = 1), all values for this domain = 0.0
         points_in_one_row_domains = np.divide(dom_sum, dom_size)
         suspicious_dom = np.nonzero(points_in_one_row_domains < len(self.domains))
         if suspicious_dom[0].shape != (0,):
