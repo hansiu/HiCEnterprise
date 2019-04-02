@@ -42,6 +42,8 @@ class Extractor:
         self.hic_color = hic_color
         self.inter_color = inter_color
         self.distribution = distribution
+        self.all_dom = all_dom
+        self.inter_indom = inter_indom
 
     def _symm(self, hicmap):
         return ((hicmap + np.transpose(hicmap)) / 2)
@@ -94,13 +96,16 @@ class Extractor:
         for i1, d1 in enumerate(self.domains):
             for i2, d2 in enumerate(self.domains):
                 domain_matrix[i1, i2] = self.hicmap[d1[0]:d1[1] + 1, d2[0]:d2[1] + 1].sum()
-            dom_size[i1] =  d1[1]+1-d1[0] #moja   
-        dom_sum = domain_matrix.sum(axis =0) # in order to eliminate near to centromere domains with small amount of contacts we calculate the mean number of contacts in one row inside each domain, and if it is less than  n*len_domains (default n = 1), all values for this domain = 0.0
-        points_in_one_row_domains = np.divide(dom_sum, dom_size)
-        suspicious_dom = np.nonzero(points_in_one_row_domains < len(self.domains))
-        if suspicious_dom[0].shape != (0,):
-            for d in suspicious_dom[0]:
-                domain_matrix[d] = domain_matrix[:,d] = 0.0
+            dom_size[i1] =  d1[1]+1-d1[0] #moja
+        if self.all_dom == False:
+            dom_sum = domain_matrix.sum(axis =0) # in order to eliminate near to centromere domains with small amount of contacts we calculate the mean number of contacts in one row inside each domain, and if it is less than  n*len_domains (default n = 1), all values for this domain = 0.0
+            points_in_one_row_domains = np.divide(dom_sum, dom_size)
+            suspicious_dom = np.nonzero(points_in_one_row_domains < self.inter_indom * len(self.domains))
+            if suspicious_dom[0].shape != (0,):
+                for d in suspicious_dom[0]:
+                    domain_matrix[d] = domain_matrix[:,d] = 0.0
+            else: pass
+        else: pass
         return domain_matrix
 
     def calc(self, domain_matrix):
@@ -286,5 +291,5 @@ class Extractor:
             from .visualize import Plotter
             p = Plotter(self.hic_path, stats_folder, self.domains_name, self.chr, self.threshold, self.plot_title,
                         self.ticks_separ, self.hic_color, self.inter_color, self.bin_res, self.distribution,
-                        self.hic_name)
+                        self.hic_name, self.all_dom, self.inter_indom)
             p.run(figures_folder)

@@ -37,7 +37,7 @@ parent_parser.add_argument('-c', '--chr', help='Chromosome for which to extract 
 parent_parser.add_argument('-b', '--bin_res',
                            help='Resolution (size of the bins on the hicmaps) in bp i.e. 10000 for 10kb'
                                 ' resolution', type=int, required=True)
-parent_parser.add_argument('-t', '--threshold', help='Statistical cutoff threshold',
+parent_parser.add_argument('-t', '--threshold', help='Statistical cutoff threshold. Default = 0.01',
                            type=float,
                            default=0.01)
 parent_parser.add_argument('-s', '--stats_folder', help="Folder to save the statistics & significant points in",

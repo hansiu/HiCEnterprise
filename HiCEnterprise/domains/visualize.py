@@ -20,7 +20,7 @@ class Plotter:
     """
 
     def __init__(self, hic_map, stats_folder, interactions, chrom, threshold, plot_title, ticks_separ, hic_color,
-                 inter_color, bin_res, distribution, hic_name):
+                 inter_color, bin_res, distribution, hic_name, all_dom, inter_indom):
         hic_map = os.path.abspath(hic_map)
         stats_folder = os.path.abspath(stats_folder)
         self.chr = chrom
@@ -38,6 +38,8 @@ class Plotter:
         self.hic_color = hic_color
         self.inter_color = inter_color
         self.bin_res = bin_res
+        self.all_dom = all_dom
+        self.inter_indom = inter_indom
 
     def _get_interactions(self, stats_folder, filename, corr=""):
         name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
@@ -85,18 +87,15 @@ class Plotter:
         else:
             pass
         plt.title(self.plot_title, fontsize=7)
-        output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[
-            0] + '-' + self.distribution + ".png"
+        if self.all_dom == True:
+            output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[
+                0] + '-' + self.distribution + ".png"
+        else: 
+            output = figures_folder + '/' + self.hic_name + '-' + corr + self.interactions_name.split('.')[
+                0] + '-' + self.distribution + "-" + "pericent_multipl_" + str(self.inter_indom) + ".png"
         plt.savefig(output, dpi=1500, bbox_inches='tight')
-        np.save("pure.npy", self.hicmap)
-        np.save("inter.npy", interaction_matrix)
-        mat_sum = self.hicmap.sum(axis=0)
-        int_sum = interaction_matrix.sum(axis = 0)
         plt.close()
-        plt.plot(mat_sum)
-        plt.plot(int_sum)
-        plt.savefig("moje.png", dpi=1500, bbox_inches='tight')
-        plt.close()
+
 
     def run(self, figures_folder):
         """
@@ -120,7 +119,7 @@ parser.add_argument('-c', '--chr', type=str, help="Chromosome number", required=
 parser.add_argument('-s', '--stats_folder', help="Folder to load the significant interactions from", type=str,
                     default='./stats/')
 parser.add_argument('-f', '--figures_folder', help="Folder to save the plots in", type=str, default='./figures/')
-parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis", default=0.01)
+parser.add_argument('-t', '--threshold', type=float, help="Threshold that was used for statistical analysis. Default = 0.01", default=0.01)
 parser.add_argument('-l', '--plot_title', type=str,
                     help="The title of the plot. If it contains spaces, use quotation marks.",
                     default='Interactions')
@@ -145,7 +144,7 @@ parser.add_argument('-n', '--hic_name', help="Name to use for Hi-C map. default 
                     type=str)
 parser.add_argument('--all_domains', help="Stop remove pericentromeric domains and domains with rare interdomains contacts, where a mean number of contacts in one row is less than n*numer_of_domains. n = 1 and can be changed by --interact_indomain parameter",
                             action="store_true")
-parser.add_argument('-g','--interact_indomain', type =float, help="Multiplier of domains_number, that is a threeshold for neglecting pericentromeric domains. Mutualy exclusive with --all_domains option. Default = 1, higher number - more domains will be removed",
+parser.add_argument('-g','--interact_indomain', type =float, help="Multiplier of domains_number, that is a threeshold for neglecting pericentromeric domains. It is not needed if --all_domains option is on. Default = 1.0, higher number - more domains will be removed",
                             default = 1)
 
 # Main
