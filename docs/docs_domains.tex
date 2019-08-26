@@ -7,19 +7,18 @@ Hypergeometric (default), Negative Binomial and Poisson.
 
 \section{Available distributions}
 
+\subsection{Poisson}
+Another approach is to assume that the contacts are distributed according to the Poisson distribution with the $\lambda$ parameter depending on the distance from the diagonal. In this case, for every domain pair, we estimate the average contact frequency $\lambda_d$ in the diagonals corresponding to the distance between them and score the given domain contact against the Poisson distribution with the mean and variance $\lambda_d$. Poisson distribution is used as default by the program.
+
 \subsection{Hypergeometric}
 
 \begin{equation}
 Pvalue = 1 - \sum_{i=0}^{k-1} \frac{{a\choose i}{N-a\choose b-i }}{{N\choose b}}
 \end{equation}
 
-Hypergeometric distribution is used as default by the program.
 Here $N$ (population size) is the sum of all frequencies in the Hi-C map, $a$ is the sum from the column of domain A and
 $b$ is the sum from the row of domain B (number of success states in the population and number of draws). $k$ is the number of contacts between domains A and B. This idea
 and original code was developed by Irina Tuszyńska and presented in (Niskanen et al. n.d.).
-
-\subsection{Poisson}
-Another approach is to assume that the contacts are distributed according to the Poisson distribution with the $\lambda$ parameter depending on the distance from the diagonal. In this case, for every domain pair, we estimate the average contact frequency $\lambda_d$ in the diagonals corresponding to the distance between them and score the given domain contact against the Poisson distribution with the mean and variance $\lambda_d$.
 
 \subsection{Negative Binomial}
 The negative binomial distribution is slightly more general than the Poisson distribution discussed in the previous section. In particular it allows for overdispersion of the data. In this case, for each pair of domains at the distance $d$ we estimate the mean contact frequency $\mu_d$ and variance $\sigma^2_d \geq \mu$ from all values in the respective diagonals and then score the contact significance of this domain pair against the negative binomial distribution with the estimated mean and variance. 
@@ -37,7 +36,7 @@ To run the domain-domain interactions analysis you need:
 All coordinates should be provided in bp.
 
 \subsubsection{Example files}
-Example files are provided in \lstinline{HiCEnterprise/HiCEnterprise/tests/test_files} directory in \lstinline{maps} and \lstinline{doms}.
+Example files are provided in \lstinline{HiCEnterprise/HiCEnterprise/tests/test_files} directory in \lstinline{maps} and \lstinline{doms}. 
 
 Overall, the usage looks like this:
 
@@ -70,7 +69,7 @@ HiCEnterprise domains --hic_map ./map40kb.npy --domain_file
 \end{lstlisting}
 
 
-\subsubsection{Visualisation} % TODO !!!!
+\subsubsection{Visualisation} 
 
 If you want to plot the results with matplotlib, add --plotting argument to the command. Resulting figures can be found
 in director provided by --figures\_folder option.
@@ -100,9 +99,13 @@ In this folder you will find the plotted figures if the --plotting argument was 
 extracted to PNG files. Files are named by the map name, "corr" if the FDR corrected data is on the plot, domains file
 name, and distribution name. Example: map40kb-corr\_domains-hypergeom.png
 
+More interesting examples with real HiC maps are available on the HiCEnterprise site http://regulomics.mimuw.edu.pl/wp/hicenterprise/
+
 \section{All arguments listed alphabetically}
 \label{sec:arguments2}
 \begin{itemize}
+   \item --all\_domains : Stop remove pericentromeric domains and domains with rare interdomains contacts, where a mean
+    number of contacts in one row is less than n*numer\_of\_domains. n = 1 and can be changed by --interact\_indomain parameter
     \item -b, --bin\_res : REQUIRED Resolution (size of the bins on the Hi-C maps) in bp i.e.~10000 for 10kb resolution.
     \item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
     \item --distribution : The distribution on which you would like to base the identification of domain-domain
@@ -111,6 +114,8 @@ name, and distribution name. Example: map40kb-corr\_domains-hypergeom.png
     dom\_id(int) chromosome(int) dom\_start(bp) dom\_end(bp) sherpa-lvl(optional).
     \item -e, --ticks\_separation : Frequency of ticks on the plot.
     \item -f, --figures\_folder : Folder to save the figures (plots) in. Default is './figures/'.
+     \item  -g --interact\_indomain : Multiplier of domains\_number, that is a threeshold for neglecting pericentromeric domains. 
+    Mutualy exclusive with --all\_domains option. Default = 1, higher number - more domains will be removed.
     \item -l, --plot\_title : The title of the plot. If it contains spaces, use quotation marks. Default is
     "Interactions".
     \item -m, --hic\_map : Path to the single-chromosome Hi-C map in numpy format.

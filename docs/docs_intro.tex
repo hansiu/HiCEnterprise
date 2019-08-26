@@ -5,8 +5,8 @@ HiCEnterprise predicts long-range interactions between regions/domains based on 
 Establish contact!
 
 \section{What is in the package?}
-HiCEnterprise takes a list of regions/domains and searches for their significant interactions on given Hi-C maps.
-Package consists of two types of analyses: regions and domains.
+HiCEnterprise takes a list of small (1-3 bins) regions or Topological Associated Domains and searches for their significant interactions on given Hi-C maps.
+Package consists of two parts that perform different types of analysis: prediction of interactions between regions and domains.
 
 \subsection{Types of analyses}
 
@@ -18,14 +18,14 @@ More in~\ref{regions}.
 
 \subsubsection{Domains}
 In the domain part of the package we implemented the method for prediction of long-range interactions between TADs
-(Topologically Associating Domains) as presented by (Niskanen et al. n.d.).
+(Topologically Associating Domains) as presented in (Niskanen et al. n.d.).
 
 More in~\ref{domains}.
 
 \section{Dependencies}
 \begin{itemize}
 \item \href{https://www.python.org}{Python} version 2.7 or 3.5/6
-\item required python packages are provided in requirements.txt file.
+\item required python packages: numpy, scipy, statsmodels, matplotlib.
 \item if you want to plot through R, you need have R installed with needed packages.
 
 \end{itemize}
@@ -42,7 +42,8 @@ HiCEnterprise type options
 If you want to see the list of available arguments with short explanations type either \\
 \lstinline{HiCEnterprise regions --help}
 or \lstinline{HiCEnterprise domains --help}. Full specifications for each argument can be found in the documentation
-(\ref{regions} and~\ref{domains})
+(\ref{regions} and~\ref{domains}) \\
+
 
 \subsection{Installation}
 
@@ -51,22 +52,21 @@ python setup.py install
 \end{lstlisting}
 
 
-You may need administrative privileges to do this.
+You may need administrative privileges to do this.\\
+
 
 \subsubsection{Testing the installation}
 
-To test if the scripts behave in a way they should be find the main HiCEnterprise directory and run:
+To test the scripts, please install pytest package, go to the main HiCEnterprise directory and run:
 
 \begin{lstlisting}
 python setup.py test
 \end{lstlisting}
 
-pytest package is needed for running the test framework.
-
 
 \subsection{Examples}
 
-We provided some example files (used for testing too) with which you can learn to use the program.
+We provided some example files (used for testing too) with which you can learn how to use the program. In order to easy download package here are available small example files that are useful for testing if the program works properly. In order to test program on the real Hi-C maps, please download example files from the HiCEnterprise web page: \url{http://regulomics.mimuw.edu.pl/wp/hicenterprise/}
 Here you can see two example runs:
 
 \subsubsection{Regions}

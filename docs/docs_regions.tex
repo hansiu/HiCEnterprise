@@ -50,7 +50,6 @@ There are a few required arguments for the analysis.
 For information on formats of files see~\ref{sec:input}.
 
 
-
 Run with only required arguments:
 \begin{lstlisting}
 HiCEnterprise regions --hic_folders ./map40kb_replicate1 
@@ -71,12 +70,12 @@ HiCEnterprise regions --hic_folders ./map40kb_replicate1
 40000 --plotting mpl --figures_folder ./my_folder_for_figures
 \end{lstlisting}
 
-If you don not provide the --figures\_folder argument, ./figures directory will be created and the plots will be put
+If you do not provide the --figures\_folder argument, ./figures directory will be created and the plots will be put
 there.
 
 \paragraph{Example usage files}
 
-There are also some files with example usage files provided in HiCEnterprise/example\_usage directory i.e.:
+There are also some files with example usage provided in HiCEnterprise/example\_usage directory i.e.:
 \begin{itemize}
     \item TSS enrichment analysis for found predictions of interactions
     \item generating random bins
@@ -144,8 +143,7 @@ calculations.
 should be of same resolution.
 \item -c, --chr : REQUIRED Name of the chromosome for which to extract domain interactions.
 \item -f, --figures\_folder : Folder to save the figures (plots) in. Default is '../figures/'.
-\item -m, --hic\_folders : REQUIRED Folder/folders in which the Hi-C data is stored with file names in format mtx-N-N.npy, where N =
-chromosome name
+\item -m, --hic\_folders : REQUIRED Folder/folders in which the Hi-C data is stored with file names in format mtx-N-N.npy, where N = chromosome name
 \item -n, --num\_bins : Number of bins left and right to be considered when extracting the interaction profile.
 \item --num\_regs : Number of regions to plot
 \item -p, --pickled\_folder : Folder with pickled files (to load from/save in). Default is '../pickles/'.
