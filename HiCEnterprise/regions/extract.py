@@ -329,8 +329,10 @@ class Extractor:
                     self.num_bins) +
                 rest_of_name + '.' + f, 'w')
             if f != 'txt':
-                sign_file.writelines(['track name="LongRanger predictions ' + self.regions_name + ' chr' +
-                                      self.chr + ' FDR' + str(self.threshold) + '"\n'])
+                sign_file.writelines(['#track name="LongRanger predictions ' + self.regions_name + ' chr' +
+                                      self.chr + ' FDR' + str(self.threshold) + '"\n',"#chr start    end chr_int  start_int end_int -log10(q-val)\n" ])
+                #sign_file.writelines(['track name="LongRanger predictions ' + self.regions_name + ' chr' +
+                #                      self.chr + ' FDR' + str(self.threshold) + '"\n'])
             significant[f] = csv.writer(sign_file, delimiter='\t')
             logger.debug('Created significant file writer for ' + f + ' format')
             if single_sig and len(regions[0].weighted) > 1:
@@ -371,9 +373,12 @@ class Extractor:
                             for pos in reg.positions:
                                 for b in range((x[0][1] - x[0][0]) + 1):
                                     single_sigs['bed'][0].writerow(
-                                        ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
-                                         (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" + str(pos[0]) +
-                                         "_" + str(pos[1] + 1), -np.log10(x[1][b])])
+                                        ["chr" + self.chr, str(pos[0]), str(pos[1] + 1), "chr" + self.chr,  (x[0][0] + b) * self.bin_res,
+                                         (x[0][0] + b + 1) * self.bin_res, -np.log10(x[1][b])])
+                                    #single_sigs['bed'][0].writerow(
+                                    #    ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
+                                    #     (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" + str(pos[0]) +
+                                    #     "_" + str(pos[1] + 1), -np.log10(x[1][b])])
                     if 'gff' in formats:
                         if not self._save_sig_gff(single_sigs['gff'][0], s, True, reg.positions, reg.bin, remap, lo):
                             continue
@@ -402,9 +407,12 @@ class Extractor:
                                 for pos in reg.positions:
                                     for b in range((x[0][1] - x[0][0]) + 1):
                                         single_sigs['bed'][i].writerow(
-                                            ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
-                                             (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" +
-                                             str(pos[0]) + "_" + str(pos[1] + 1), -np.log10(x[1][b])])
+                                            ["chr" + self.chr, str(pos[0]), str(pos[1] + 1), "chr" + self.chr,  (x[0][0] + b) * self.bin_res,
+                                             (x[0][0] + b + 1) * self.bin_res, -np.log10(x[1][b])])
+                                        #single_sigs['bed'][i].writerow(
+                                        #    ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
+                                        #     (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" +
+                                        #     str(pos[0]) + "_" + str(pos[1] + 1), -np.log10(x[1][b])])
                         if 'gff' in formats:
                             if not self._save_sig_gff(single_sigs['gff'][i], s, True, reg.positions, reg.bin, remap,
                                                       lo):
@@ -432,10 +440,13 @@ class Extractor:
                     for x in sig:
                         for pos in reg.positions:
                             for b in range((x[0][1] - x[0][0]) + 1):
+                                #significant['bed'].writerow(
+                                #    ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
+                                #     (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" + str(pos[0]) + "_"
+                                #     + str(pos[1] + 1), str(min(list(-np.log10(x[1][b]))))])
                                 significant['bed'].writerow(
-                                    ["chr" + self.chr, (x[0][0] + b) * self.bin_res,
-                                     (x[0][0] + b + 1) * self.bin_res, "chr" + self.chr + "_" + str(pos[0]) + "_"
-                                     + str(pos[1] + 1), str(min(list(-np.log10(x[1][b]))))])
+                                    ["chr" + self.chr, str(pos[0]), str(pos[1] + 1), "chr" + self.chr, (x[0][0] + b) * self.bin_res,
+                                     (x[0][0] + b + 1) * self.bin_res, str(min(list(-np.log10(x[1][b]))))])
                 if 'gff' in formats:
                     if not self._save_sig_gff(significant['gff'], sig, False, reg.positions, reg.bin, remap, lo):
                         continue
