@@ -46,7 +46,9 @@ class Extractor:
         self.inter_indom = inter_indom
 
     def _symm(self, hicmap):
+        hicmap = np.nan_to_num(hicmap)
         return ((hicmap + np.transpose(hicmap)) / 2)
+
 
     def _load_domains(self, domain_file):
         logger.info('Loading Domains: ' + domain_file)
@@ -106,6 +108,9 @@ class Extractor:
                     domain_matrix[d] = domain_matrix[:,d] = 0.0
             else: pass
         else: pass
+        if domain_matrix[np.nonzero(domain_matrix)].size == 0:
+            logger.error("WARNING! Due to the sparsity of the matrix, please use --all_domains option")
+            sys.exit(1)
         return domain_matrix
 
     def calc(self, domain_matrix):
@@ -117,10 +122,13 @@ class Extractor:
                                                                                                        '(this may take some time...)')
 
         if self.distribution == 'hypergeom':
+            logger.info("Hypergeometric test is calculating")
             sigs, corr_sigs = self._calc_hypergeom(domain_matrix)
         elif self.distribution == 'negbinom':
+            logger.info("Negativ binomial test is calculating")
             sigs, corr_sigs = self._calc_negbinom(domain_matrix)
         elif self.distribution == 'poisson':
+            logger.info("Poisson test is calculating")
             sigs, corr_sigs = self._calc_poisson(domain_matrix)
         else:
             logger.error('The chosen distribution ' + self.distribution + ' is not available. Choose from: hypergeom, '
@@ -133,7 +141,7 @@ class Extractor:
         sigs = []
         n = np.sum(np.triu(domain_matrix))
         #n =  np.sum(domain_matrix)
-        pvalue_matrix = np.zeros(domain_matrix.shape)
+        pvalue_matrix = np.ones(domain_matrix.shape)
         for i in range(domain_matrix.shape[0]):
             a = sum(domain_matrix[i][:])
             for j in range(domain_matrix.shape[1]):
@@ -141,6 +149,7 @@ class Extractor:
                 model = ss.hypergeom(n, a, b)
                 expected = (a * b) / n
                 k = domain_matrix[i][j]
+                #print expected, k, a, b, n
                 if expected and k:
                     pval = model.sf(k)
                 else:
@@ -242,8 +251,12 @@ class Extractor:
 
     def _fdr_correct(self, pvalue_matrix, dom_shape):
         logger.info('FDR correcting the pvalues')
-
+        pvalue_matrix[np.isnan(pvalue_matrix)] = 1.0
         corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(dom_shape)
+        np.save(open('pval.npy','w'), pvalue_matrix)
+        #for i,j in  zip(pvalue_matrix.flatten(),corrected.flatten()):
+        #    if i<1.0:
+        #        print 'p-qval', i,j
 
         corr_sigs = []
         for i in range(dom_shape[0]):
@@ -283,8 +296,17 @@ class Extractor:
         """
         dom_matrix = self.create_domain_matrix()
         sigs, corr_sigs = self.calc(dom_matrix)
-        self.save_sigs(sigs, stats_folder)
-        self.save_sigs(corr_sigs, stats_folder, corr="corr_")
+        print "sigs", sigs
+        print 'corr', corr_sigs
+        if sigs == []:
+            logger.error('There is no p-val lower tan threeshold. Change threeshold value to bigger value and run again. Try 0.01, 0.05 or 0.1')
+            sys.exit(1)
+        else:
+            self.save_sigs(sigs, stats_folder)
+        if corr_sigs == []:
+            logger.info('There is no appropriate q-value after FDR correction!')
+        else:
+            self.save_sigs(corr_sigs, stats_folder, corr="corr_")
 
         if plotting is not False:
             logger.debug('Getting to plotter')
