@@ -44,10 +44,13 @@ class Plotter:
     def _get_interactions(self, stats_folder, filename, corr=""):
         name = stats_folder + '/' + filename + '-' + self.hic_name + '-' + corr + 'stats' + self.chr + '-' + \
                "_".join(str(self.threshold).split('.')) + '-' + self.distribution + '.txt'
-        interactions_file = open(os.path.abspath(name), 'r')
-        interactions = csv.reader(interactions_file, delimiter='\t')
-        next(interactions)  # skip headers
-        return interactions
+        try:
+            interactions_file = open(os.path.abspath(name), 'r')
+            interactions = csv.reader(interactions_file, delimiter='\t')
+            next(interactions)  # skip headers
+            return interactions        
+        except IOError:
+            logger.error(name + " file is not accessible")
 
     def prepare_interaction_matrix(self, interactions):
         """

@@ -157,6 +157,8 @@ class Plotter:
                 a.tick_params(axis='both', which='major', labelsize=7)
                 a.spines['top'].set_visible(False)
             for i in range(n):
+                #region.weighted[i] = [0.0 if np.isnan(i) else i for i in region.weighted[i]]
+                #print region.bin, region.weighted[i], region.weighted[i][middle - self.num_bins:middle + self.num_bins + 1]
                 ax.plot(t, region.weighted[i][middle - self.num_bins:middle + self.num_bins + 1], c=colors[i],
                         alpha=0.8, linewidth=0.8)
                 ax2.plot(t,

@@ -46,7 +46,9 @@ class Extractor:
         self.inter_indom = inter_indom
 
     def _symm(self, hicmap):
+        hicmap = np.nan_to_num(hicmap)
         return ((hicmap + np.transpose(hicmap)) / 2)
+
 
     def _load_domains(self, domain_file):
         logger.info('Loading Domains: ' + domain_file)
@@ -54,28 +56,39 @@ class Extractor:
         reader = csv.reader(domain_file, delimiter=' ')
         domains = []
         warned = False
-        for row in reader:
-            if len(row) > 5 and not warned:
-                logger.warning(
-                    'There are more than 5 columns in the input domains. This may suggest that your input domains '
-                    'are in the wrong format.')
-                warned = True
-            if len(row) < 4:
-                logger.critical('There is something wrong with the input domains: not enough columns.')
-                sys.exit(1)
+        row1 = next(reader)
+        if int(row1[0]) != 1:
+            logger.critical(
+                'The first columnt (number of the domain) should start from 1, please change domain file and start again.')
+            sys.exit(1)
+        if len(row1) > 5 and not warned:
+            logger.warning(
+                'There are more than 5 columns in the input domains. This may suggest that your input domains '
+                'are in the wrong format.')
+            warned = True
+        if len(row1) < 4:
+            logger.critical('There is something wrong with the input domains: not enough columns.')
+            sys.exit(1)
+        try:
+            row1 = [int(row1[0]), str(row1[1]).lstrip('chr')] + list(map(int, row1[2:5]))
+        except ValueError:
+            logger.critical(
+                'There is something wrong with the input domains: columns are in the wrong format (should be '
+                'integers).')
+            sys.exit(1)
+        if row1[1] == self.chr:
+            if (not self.sherpa_level) or (len(row1) >= 5 and row1[4] == self.sherpa_level):
+                domains.append(
+                    [int(row1[2] / self.bin_res), int(row1[3] / self.bin_res) - 1])
 
-            try:
-                row = [int(row[0]), str(row[1]).lstrip('chr')] + list(map(int, row[2:5]))
-            except ValueError:
-                logger.critical(
-                    'There is something wrong with the input domains: columns are in the wrong format (should be '
-                    'integers).')
-                sys.exit(1)
+        for row in reader:
             if row[1] == self.chr:
-                if (not self.sherpa_level) or (len(row) >= 5 and row[4] == self.sherpa_level):
-                    domains.append(
-                        [int(row[2] / self.bin_res), int(row[3] / self.bin_res) - 1])
+                if (not self.sherpa_level) or (len(row) >= 5 and int(row[4]) == self.sherpa_level):
+                    domains.append([int(int(row[2]) / self.bin_res), int(int(row[3]) / self.bin_res) - 1])
         domains = sorted(domains, key=itemgetter(0))
+        if len(domains) == 0:
+            logger.critical('The program doas not find any domains, probably the domain definition file is wrong formated. Change the domain definition file and try again.')
+            sys.exit(1)
         return domains
 
     def _check_overlap(self):
@@ -98,7 +111,7 @@ class Extractor:
                 domain_matrix[i1, i2] = self.hicmap[d1[0]:d1[1] + 1, d2[0]:d2[1] + 1].sum()
             dom_size[i1] =  d1[1]+1-d1[0] #moja
         if self.all_dom == False:
-            dom_sum = domain_matrix.sum(axis =0) # in order to eliminate near to centromere domains with small amount of contacts we calculate the mean number of contacts in one row inside each domain, and if it is less than  n*len_domains (default n = 1), all values for this domain = 0.0
+            dom_sum = domain_matrix.sum(axis =0) # to eliminate near to centromere domains with small amount of contacts we calculate the mean number of contacts in one row inside each domain, and if it is less than  n*len_domains (default n = 1), all values for this domain = 0.0
             points_in_one_row_domains = np.divide(dom_sum, dom_size)
             suspicious_dom = np.nonzero(points_in_one_row_domains < self.inter_indom * len(self.domains))
             if suspicious_dom[0].shape != (0,):
@@ -106,6 +119,9 @@ class Extractor:
                     domain_matrix[d] = domain_matrix[:,d] = 0.0
             else: pass
         else: pass
+        if domain_matrix[np.nonzero(domain_matrix)].size == 0:
+            logger.error("WARNING! Due to the sparsity of the matrix, please use --all_domains option")
+            sys.exit(1)
         return domain_matrix
 
     def calc(self, domain_matrix):
@@ -117,10 +133,13 @@ class Extractor:
                                                                                                        '(this may take some time...)')
 
         if self.distribution == 'hypergeom':
+            logger.info("Hypergeometric test is calculating")
             sigs, corr_sigs = self._calc_hypergeom(domain_matrix)
         elif self.distribution == 'negbinom':
+            logger.info("Negativ binomial test is calculating")
             sigs, corr_sigs = self._calc_negbinom(domain_matrix)
         elif self.distribution == 'poisson':
+            logger.info("Poisson test is calculating")
             sigs, corr_sigs = self._calc_poisson(domain_matrix)
         else:
             logger.error('The chosen distribution ' + self.distribution + ' is not available. Choose from: hypergeom, '
@@ -133,7 +152,7 @@ class Extractor:
         sigs = []
         n = np.sum(np.triu(domain_matrix))
         #n =  np.sum(domain_matrix)
-        pvalue_matrix = np.zeros(domain_matrix.shape)
+        pvalue_matrix = np.ones(domain_matrix.shape)
         for i in range(domain_matrix.shape[0]):
             a = sum(domain_matrix[i][:])
             for j in range(domain_matrix.shape[1]):
@@ -242,8 +261,9 @@ class Extractor:
 
     def _fdr_correct(self, pvalue_matrix, dom_shape):
         logger.info('FDR correcting the pvalues')
-
+        pvalue_matrix[np.isnan(pvalue_matrix)] = 1.0
         corrected = fdrcorrection0(pvalue_matrix.flatten(), self.threshold)[1].reshape(dom_shape)
+        #np.save(open('pval.npy','wb'), pvalue_matrix)
 
         corr_sigs = []
         for i in range(dom_shape[0]):
@@ -283,8 +303,15 @@ class Extractor:
         """
         dom_matrix = self.create_domain_matrix()
         sigs, corr_sigs = self.calc(dom_matrix)
-        self.save_sigs(sigs, stats_folder)
-        self.save_sigs(corr_sigs, stats_folder, corr="corr_")
+        if sigs == []:
+            logger.error('There is no p-val lower tan threeshold. Change threeshold value to bigger value and run again. Try 0.01, 0.05 or 0.1')
+            sys.exit(1)
+        else:
+            self.save_sigs(sigs, stats_folder)
+        if corr_sigs == []:
+            logger.info('There is no appropriate q-value after FDR correction!')
+        else:
+            self.save_sigs(corr_sigs, stats_folder, corr="corr_")
 
         if plotting is not False:
             logger.debug('Getting to plotter')

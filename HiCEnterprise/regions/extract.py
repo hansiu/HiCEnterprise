@@ -234,6 +234,7 @@ class Extractor:
         """
 
         hicmap.load()
+        np.nan_to_num(hicmap)
 
         for region in regs:
             region.intensities.append([])
@@ -285,8 +286,9 @@ class Extractor:
             x = len(regs[r].corrected_pvalues)
             regs[r].corrected_pvalues.append(corr_big[r])
             regs[r].weighted.append(
-                [y / hicmap.means[-(int(len(regs[r].intensities[x]) / 2.0) - regs[r].intensities[x].index(y))] for y in
+                [0.0 if np.isnan(hicmap.means[-(int(len(regs[r].intensities[x]) / 2.0) - regs[r].intensities[x].index(y))]) else y / hicmap.means[-(int(len(regs[r].intensities[x]) / 2.0) - regs[r].intensities[x].index(y))]  for y in
                  regs[r].intensities[x]])
+            
 
     def save_stats_and_sigs(self, regions, single_sig, remap, formats, h_fs):
         """
